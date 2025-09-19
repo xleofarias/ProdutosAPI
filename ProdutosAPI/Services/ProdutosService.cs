@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 
 namespace ProdutosAPI.Services
 {
+    // Implementação do serviço de produtos
     public class ProdutosService : IProdutosService
     {
         public readonly ProdutosDBContext _context;
@@ -14,6 +15,8 @@ namespace ProdutosAPI.Services
         {
             _context = context;
         }
+
+        // Busca um produto por um critério específico
         public async Task<Produtos> GetProdutosById(Expression<Func<Produtos, bool>> predicate)
         {
             var produto = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(predicate);
@@ -22,12 +25,16 @@ namespace ProdutosAPI.Services
 
             return produto;
         }
+
+        // Busca todos os produtos
         public async Task<IEnumerable<Produtos>> GetProdutos()
         {
             var produtos = await _context.Produtos.AsNoTracking().ToListAsync();
 
             return produtos;
         }
+
+        // Adiciona um novo produto
         public async Task<Produtos> PostProdutos(ProdutosDTO produto)
         {
             var novoProduto = new Produtos
@@ -44,6 +51,7 @@ namespace ProdutosAPI.Services
 
         }
 
+        // Atualiza um produto existente
         public async Task<bool> PutProdutos(int id,ProdutosDTO produto)
         {
             var produtoAtualizar = await _context.Produtos.FirstOrDefaultAsync(p => p.Id == id);
@@ -59,6 +67,8 @@ namespace ProdutosAPI.Services
 
             return true;
         }
+
+        // Deleta um produto por ID
         public async Task<bool> DeleteProdutos(int id)
         {
             var produtoDeletar =  await _context.Produtos.FirstOrDefaultAsync(p => p.Id == id);

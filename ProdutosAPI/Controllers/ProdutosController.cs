@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
-using ProdutosAPI.Migrations;
-using ProdutosAPI.Models;
 using ProdutosAPI.Services;
 
 namespace ProdutosAPI.Controllers
@@ -12,6 +10,7 @@ namespace ProdutosAPI.Controllers
     {
         public readonly IProdutosService _produtos;
 
+        // Injeção de dependência do serviço de produtos
         public ProdutosController(IProdutosService produtos)
         {
             _produtos = produtos;
@@ -56,7 +55,7 @@ namespace ProdutosAPI.Controllers
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Retorna os dados produto cadastrado</returns>
         [HttpPost]
-        public async Task<ActionResult<Produtos>> PostProdutos(ProdutosDTO produto)
+        public async Task<ActionResult<ProdutosAPI.Models.Produtos>> PostProdutos(ProdutosDTO produto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 

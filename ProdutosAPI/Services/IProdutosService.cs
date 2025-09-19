@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 
 namespace ProdutosAPI.Services
 {
+    // Interface para o serviço de produtos
     public interface IProdutosService
     {
        public  Task<Produtos> GetProdutosById(Expression<Func<Produtos, bool>> predicate);

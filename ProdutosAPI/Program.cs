@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Datas;
+using ProdutosAPI.Middlewares;
 using ProdutosAPI.Services;
 using System.Reflection;
 
@@ -33,6 +34,9 @@ internal class Program
         builder.Services.AddScoped<IProdutosService, ProdutosService>();
 
         var app = builder.Build();
+
+        //Adiciona o middleware de tratamento de exceções
+        app.UseMiddleware<BackofficeExceptionHandlerMiddleware>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
