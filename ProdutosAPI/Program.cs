@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Datas;
 using ProdutosAPI.Services;
+using System.Reflection;
 
 internal class Program
 {
@@ -11,9 +12,18 @@ internal class Program
         // Add services to the container.
         builder.Services.AddControllers();
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+
+        builder.Services.AddSwaggerGen(c => 
+        {
+            //Descobre o nome do arquivo XML que contém os comentários
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            //Monta o caminho completo até esse XML (normalmente na pasta bin/Debug/netX.X/)
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+            //Informa ao Swagger que deve carregar os comentários desse arquivo XML
+            c.IncludeXmlComments(xmlPath);
+        });
 
         //Add DbContext
         builder.Services.AddDbContext<ProdutosDBContext>(options =>
