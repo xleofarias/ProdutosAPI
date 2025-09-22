@@ -2,6 +2,7 @@
 using ProdutosAPI.Datas;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Models;
+using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
 
 namespace ProdutosAPI.Services

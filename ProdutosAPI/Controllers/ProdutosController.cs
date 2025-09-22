@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
-using ProdutosAPI.Services;
+using ProdutosAPI.Services.Interfaces;
 
 namespace ProdutosAPI.Controllers
 {
@@ -28,8 +28,6 @@ namespace ProdutosAPI.Controllers
         {
             var produto = await _produtos.GetProdutosById(p => p.Id == id);
 
-           // if (produto is null) return NotFound("Produto não encontrado");
-
             return Ok(produto);
         }
 
@@ -43,8 +41,6 @@ namespace ProdutosAPI.Controllers
         public async Task<ActionResult<ProdutosDTO>> GetProdutos()
         {
             var produtos = await _produtos.GetProdutos();
-
-           //  if (produtos is null) return NotFound("Nenhum produto foi encontrado");
 
             return Ok(produtos);
         }

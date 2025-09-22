@@ -2,7 +2,7 @@
 using ProdutosAPI.Models;
 using System.Linq.Expressions;
 
-namespace ProdutosAPI.Services
+namespace ProdutosAPI.Services.Interfaces
 {
     // Interface para o serviço de produtos
     public interface IProdutosService

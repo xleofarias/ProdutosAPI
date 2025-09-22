@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Datas;
 using ProdutosAPI.Middlewares;
 using ProdutosAPI.Services;
+using ProdutosAPI.Services.Interfaces;
 using System.Reflection;
 
 internal class Program
