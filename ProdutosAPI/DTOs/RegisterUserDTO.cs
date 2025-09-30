@@ -9,6 +9,9 @@ namespace ProdutosAPI.DTOs
         [Required(ErrorMessage = "Email é obrigatório")]
         [EmailAddress(ErrorMessage = "O Email deve ser válido")]
         public string Email { get; set; }
+
+        [Required(ErrorMessage = "Login é obrigatório")]
+        public string Login { get; set; }
         [Required(ErrorMessage = "A senha é obrigatória")]
         public string Senha { get; set; }
     }
