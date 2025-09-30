@@ -20,9 +20,9 @@ Uma API RESTful simples para gerenciamento de produtos, desenvolvida em **ASP.NE
 ## ⚙️ Como rodar o projeto
 
 1. Clone este repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/nome-do-repo.git
-   ```
+```bash
+git clone https://github.com/seu-usuario/nome-do-repo.git
+```
 2.Acesse a pasta do projeto:
    ```bash
    cd ProdutosAPI
