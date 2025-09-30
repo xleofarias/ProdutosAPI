@@ -61,7 +61,7 @@ DELETE /api/produtos/{id} → Remove produto
 
 🔮 Próximos Passos / Melhorias Futuras
 
- Implementar autenticação e autorização com JWT
+ Implementar autenticação e autorização com JWT &#x2705;
 
  Adicionar camada de testes unitários
 
