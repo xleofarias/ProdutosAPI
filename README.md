@@ -20,9 +20,9 @@ Uma API RESTful simples para gerenciamento de produtos, desenvolvida em **ASP.NE
 ## ⚙️ Como rodar o projeto
 
 1. Clone este repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/nome-do-repo.git
-   ```
+```bash
+git clone https://github.com/seu-usuario/nome-do-repo.git
+```
 2.Acesse a pasta do projeto:
    ```bash
    cd ProdutosAPI
@@ -61,7 +61,7 @@ DELETE /api/produtos/{id} → Remove produto
 
 🔮 Próximos Passos / Melhorias Futuras
 
- Implementar autenticação e autorização com JWT
+ Implementar autenticação e autorização com JWT &#x2705;
 
  Adicionar camada de testes unitários
 
