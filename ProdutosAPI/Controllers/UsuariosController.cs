@@ -6,6 +6,7 @@ using ProdutosAPI.Services.Interfaces;
 using SecureIdentity.Password;
 using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Datas;
+using ProdutosAPI.Extensions;
 
 
 namespace ProdutosAPI.Controllers
@@ -13,49 +14,27 @@ namespace ProdutosAPI.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class UsuariosController : ControllerBase
     {
-        private readonly IAuthService _auth;
+        private readonly IUsuarioService _usuarioService;
 
-        public AuthController(IAuthService auth)
+        public UsuariosController(IUsuarioService usuarioService)
         {
-            _auth = auth;
+            _usuarioService = usuarioService;
         }
 
         [AllowAnonymous]
         [HttpPost("registrar")]
-        public async Task<IActionResult> PostRegistrar([FromBody] RegisterUserDTO usuario, [FromServices] ProdutosDBContext dbContext)
+        public async Task<ActionResult<Usuarios>> PostRegistrar([FromBody] RegisterUserDTO usuario, [FromServices] ProdutosDBContext dbContext)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = new Usuarios
-            {
-                Nome = usuario.Nome,
-                Login = usuario.Login,
-                Email = usuario.Email,
-                Slug = usuario.Email.Replace("@", "-").Replace(".", "-"),
-                RoleId = 1,
-                PasswordHash = PasswordHasher.Hash(usuario.Senha)
-            };
+            var user = await _usuarioService.PostRegistrar(usuario);
 
-            try
-            {
-                await dbContext.Usuarios.AddAsync(user);
-                await dbContext.SaveChangesAsync();
-                return Ok($"{user.Email} {user.PasswordHash}");
-            }
-            catch (DbUpdateException e)
-            {
-                return BadRequest(new { message = "Não foi possível registrar o usuário", error = e.Message });
-
-            }
-            catch
-            {
-                return StatusCode(500, "Erro interno no servidor");
-            }
+            return CreatedAtAction(nameof(GetUsuariosById), new { id = user.Id }, user);
         }
 
         [AllowAnonymous]
@@ -81,7 +60,7 @@ namespace ProdutosAPI.Controllers
 
             try
             {
-                var token = _auth.GenerateToken(usuario);
+                var token = new Token().GenerateToken(usuario);
                 return Ok(new { token });
             }
             catch
