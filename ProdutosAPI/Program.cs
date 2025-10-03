@@ -84,6 +84,7 @@ internal class Program
 
         //Add Services
         builder.Services.AddScoped<IProdutosService, ProdutosService>();
+        builder.Services.AddScoped<IUsuarioService, UsuariosService>();
         builder.Services.AddTransient<IAuthService, AuthService>();
 
         var app = builder.Build();

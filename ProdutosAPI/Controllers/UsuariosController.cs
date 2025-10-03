@@ -3,10 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Models;
 using ProdutosAPI.Services.Interfaces;
-using SecureIdentity.Password;
-using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Datas;
-using ProdutosAPI.Extensions;
 
 
 namespace ProdutosAPI.Controllers
@@ -23,8 +20,18 @@ namespace ProdutosAPI.Controllers
             _usuarioService = usuarioService;
         }
 
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Usuarios>> GetUsuariosById(int id)
+        {
+            var user = await _usuarioService.GetUsuariosById(x => x.Id == id);
+
+            return Ok(user);
+        }
+
         [AllowAnonymous]
-        [HttpPost("registrar")]
+        [HttpPost]
         public async Task<ActionResult<Usuarios>> PostRegistrar([FromBody] RegisterUserDTO usuario, [FromServices] ProdutosDBContext dbContext)
         {
             if (!ModelState.IsValid)
@@ -34,57 +41,14 @@ namespace ProdutosAPI.Controllers
 
             var user = await _usuarioService.PostRegistrar(usuario);
 
-            return CreatedAtAction(nameof(GetUsuariosById), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetUsuariosById), new { id = user.Id }, usuario);
         }
-
-        [AllowAnonymous]
-        [HttpPost("login")]
-        public async Task<IActionResult> PostLogin([FromBody] LoginDTO user, [FromServices] ProdutosDBContext dbContext)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var usuario = await dbContext.Usuarios
-                .Include(x => x.Role)
-                .FirstOrDefaultAsync(x => x.Email == user.Email);
-            if (usuario == null)
-            {
-                return NotFound(new { message = "Usuário não encontrado" });
-            }
-            if (!PasswordHasher.Verify(usuario.PasswordHash, user.Senha))
-            {
-                return BadRequest(new { message = "Senha inválida" });
-            }
-
-            try
-            {
-                var token = new Token().GenerateToken(usuario);
-                return Ok(new { token });
-            }
-            catch
-            {
-                return StatusCode(500, "Erro interno no servidor");
-            }
-        }
-
 
         [Authorize(Roles = "Admin")]
         [HttpPatch]
-        public async Task<IActionResult> PatchChangeUserRole(int userId, int newRoleId, [FromServices] ProdutosDBContext context)
+        public async Task<IActionResult> PatchChangeUserRole(int userId, int newRoleId)
         {
-            var user = await context.Usuarios.FindAsync(userId);
-            
-            if(user is null) return BadRequest("Usuário não encontrado");
-
-            var role = await context.Roles.FindAsync(newRoleId);
-
-            if(role is null) return BadRequest("Função não encontrada");
-
-            user.Role = role;
-
-            await context.SaveChangesAsync();
+            await _usuarioService.PatchChangeUserRole(userId, newRoleId);
 
             return Ok("Função alterada com sucesso");
         }
