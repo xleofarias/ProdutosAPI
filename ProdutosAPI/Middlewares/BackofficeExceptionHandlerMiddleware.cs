@@ -1,5 +1,5 @@
 ﻿using System.Net;
-
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace ProdutosAPI.Middlewares
@@ -20,7 +20,9 @@ namespace ProdutosAPI.Middlewares
                      or FileNotFoundException:
                     code = HttpStatusCode.NotFound;
                     break;
-                case ArgumentException:
+                case ArgumentException
+                     or DbUpdateException
+                     or ArgumentNullException:
                     code = HttpStatusCode.BadRequest;
                     break;
                 default:

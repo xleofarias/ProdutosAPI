@@ -45,11 +45,22 @@ namespace ProdutosAPI.Services
                 Quantidade = produto.Quantidade
             };
 
-            await _context.Produtos.AddAsync(novoProduto);
-            await _context.SaveChangesAsync();
+            if (novoProduto is null) throw new ArgumentNullException("O produto não pode ser nulo");
 
+            if (await _context.Produtos.AnyAsync(p => p.Nome == novoProduto.Nome))
+                throw new ArgumentException("Já existe um produto com esse nome cadastrado");
+
+            try 
+            {
+                await _context.Produtos.AddAsync(novoProduto);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new Exception("Erro ao salvar o produto: " + ex.Message);
+            }
+            
             return novoProduto;
-
         }
 
         // Atualiza um produto existente
@@ -63,8 +74,15 @@ namespace ProdutosAPI.Services
             produtoAtualizar.Preco = produto.Preco;
             produtoAtualizar.Quantidade = produto.Quantidade;
 
-            _context.Produtos.Update(produtoAtualizar);
-            await _context.SaveChangesAsync();
+            try 
+            {
+                _context.Produtos.Update(produtoAtualizar);
+                await _context.SaveChangesAsync();
+            }
+            catch(DbUpdateException ex)
+            {
+                throw new Exception("Erro ao tentar atualizar o produto: " + ex.Message);
+            }
 
             return true;
         }
@@ -75,9 +93,16 @@ namespace ProdutosAPI.Services
             var produtoDeletar =  await _context.Produtos.FirstOrDefaultAsync(p => p.Id == id);
             
             if (produtoDeletar is null) throw new KeyNotFoundException("Produto não encontrado");
-            
-            _context.Produtos.Remove(produtoDeletar);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                _context.Produtos.Remove(produtoDeletar);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new Exception("Erro ao tentar deletar o produto" + ex.Message);
+            }
 
             return true;
         }
