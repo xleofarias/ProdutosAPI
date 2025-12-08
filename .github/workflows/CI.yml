@@ -32,7 +32,7 @@ jobs:
     # 5. Roda os testes (Se você tiver testes unitários criados)
     # Se não tiver testes ainda, esse passo vai passar "rápido" ou avisar que não achou testes
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --configuration Release --verbosity normal
 
     # 6. O "Grand Finale" do CI: Garante que o Dockerfile funciona
     - name: Build Docker Image
