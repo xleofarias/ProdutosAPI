@@ -1,51 +1,39 @@
-name: CI - Build and Test API
+name: .NET Core CI & Docker
 
-# 1) Quando o pipeline deve rodar?
 on:
   push:
-    branches: [ "main" ]   # Roda todo push na main
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]   # Roda sempre que abrirem um PR para a main
+    branches: [ "main" ]
 
-# 2) Um pipeline tem "jobs". Aqui temos um job chamado "build".
 jobs:
-  build:
-
-    # 3) Escolhe o tipo de máquina virtual
+  build-and-test:
+    name: Build, Test e Docker
     runs-on: ubuntu-latest
 
-    # 4) Passos que serão executados na VM
     steps:
+    # 1. Baixa o código
+    - uses: actions/checkout@v4
 
-      # 4.1) Baixa seu código da branch atual
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    # 2. Configura o .NET no ambiente (Mude a versão se necessário)
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x # Altere para 6.0 ou 7.0 se for o seu caso
 
-      # 4.2) Configura o ambiente .NET (instala o SDK 8.0)
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "8.0.x"
+    # 3. Baixa as dependências (Nuget packages)
+    - name: Restore dependencies
+      run: dotnet restore
 
-      # 4.3) Restaura pacotes NuGet (mesmo que já tenha no cache local)
-      - name: Restore dependencies
-        run: dotnet restore
+    # 4. Compila o código (Verifica erros de sintaxe C#)
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
 
-      # 4.4) Build da sua API em modo Release
-      - name: Build the project
-        run: dotnet build --configuration Release --no-restore
+    # 5. Roda os testes (Se você tiver testes unitários criados)
+    # Se não tiver testes ainda, esse passo vai passar "rápido" ou avisar que não achou testes
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
 
-      # 4.5) Se tiver testes, ele roda — se não, apenas ignora
-      - name: Run tests
-        run: dotnet test --no-build --verbosity normal
-
-      # 4.6) Publica os binários (simula o que você coloca no Docker)
-      - name: Publish project
-        run: dotnet publish -c Release -o ./publish --no-build
-
-      # 4.7) Expõe os artefatos gerados (útil para o CD)
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: api_build
-          path: publish
+    # 6. O "Grand Finale" do CI: Garante que o Dockerfile funciona
+    - name: Build Docker Image
+      run: docker build . -t minha-api-csharp:latest
