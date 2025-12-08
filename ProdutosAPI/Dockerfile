@@ -3,9 +3,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copia apenas arquivos necessários para cache
-COPY *.sln ./
-COPY ProdutosAPI.csproj ./
-RUN dotnet restore
+COPY *.sln .
+COPY ProdutosAPI/ProdutosAPI.csproj ./ProdutosAPI/
+RUN dotnet restore ./ProdutosAPI/ProdutosAPI.csproj 
 
 # Copia tudo pro container
 COPY . .
