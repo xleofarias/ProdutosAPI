@@ -36,4 +36,4 @@ jobs:
 
     # 6. O "Grand Finale" do CI: Garante que o Dockerfile funciona
     - name: Build Docker Image
-      run: docker build ./ProdutosAPI . -t produtosapi:latest
+      run: docker build ../ProdutosAPI/Dockerfile -t produtosapi:latest
