@@ -1,0 +1,51 @@
+name: CI - Build and Test API
+
+# 1) Quando o pipeline deve rodar?
+on:
+  push:
+    branches: [ "main" ]   # Roda todo push na main
+  pull_request:
+    branches: [ "main" ]   # Roda sempre que abrirem um PR para a main
+
+# 2) Um pipeline tem "jobs". Aqui temos um job chamado "build".
+jobs:
+  build:
+
+    # 3) Escolhe o tipo de máquina virtual
+    runs-on: ubuntu-latest
+
+    # 4) Passos que serão executados na VM
+    steps:
+
+      # 4.1) Baixa seu código da branch atual
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 4.2) Configura o ambiente .NET (instala o SDK 8.0)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      # 4.3) Restaura pacotes NuGet (mesmo que já tenha no cache local)
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # 4.4) Build da sua API em modo Release
+      - name: Build the project
+        run: dotnet build --configuration Release --no-restore
+
+      # 4.5) Se tiver testes, ele roda — se não, apenas ignora
+      - name: Run tests
+        run: dotnet test --no-build --verbosity normal
+
+      # 4.6) Publica os binários (simula o que você coloca no Docker)
+      - name: Publish project
+        run: dotnet publish -c Release -o ./publish --no-build
+
+      # 4.7) Expõe os artefatos gerados (útil para o CD)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: api_build
+          path: publish
