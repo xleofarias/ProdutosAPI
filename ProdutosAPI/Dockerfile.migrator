@@ -1,0 +1,14 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS migrator
+WORKDIR /app
+
+COPY ProdutosAPI.csproj ./
+RUN dotnet restore
+
+COPY . .
+
+# Instala o CLI do Entity Framework
+RUN dotnet tool restore
+
+RUN dotnet build
+
+ENTRYPOINT ["dotnet", "ef", "database", "update", "--project", "ProdutosAPI.csproj"]

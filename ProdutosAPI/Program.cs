@@ -80,7 +80,14 @@ internal class Program
 
         //Add DbContext
         builder.Services.AddDbContext<ProdutosDBContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("ProdutosAPI")));
+            options.UseSqlServer(builder.Configuration.GetConnectionString("ProdutosAPI"),
+                sqlOptions => sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 10,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorNumbersToAdd: null
+                    )));
+        
+       // builder.Services.BuildServiceProvider().GetService<ProdutosDBContext>().Database.Migrate();
 
         //Add Services
         builder.Services.AddScoped<IProdutosService, ProdutosService>();
