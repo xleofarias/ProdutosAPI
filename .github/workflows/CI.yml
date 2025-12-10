@@ -3,6 +3,7 @@ name: .NET Core CI & Docker
 on:
   push:
     branches: [ "master" ]
+    tags: 'v*' # Aciona quando criar tags como v1.0, v2.0.1, etc.
   pull_request:
     branches: [ "master" ]
 
@@ -35,5 +36,16 @@ jobs:
       run: dotnet test --no-build --configuration Release --verbosity normal
 
     # 6. O "Grand Finale" do CI: Garante que o Dockerfile funciona
+    - name: Determinar a Tag da Imagem
+      id: vars
+      run: |
+        # Se for uma tag do Git, usa o nome da tag (ex: v1.0.0)
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        else
+          # Se for um push normal na main, usa 'latest'
+          echo "tag=latest" >> $GITHUB_OUTPUT
+        fi
     - name: Build Docker Image
-      run: docker build -f ./ProdutosAPI/Dockerfile . -t produtosapi:latest
+      # Repare no ${{ steps.vars.outputs.tag }} -> é a variável que criámos acima
+      run: docker build -f ./ProdutosAPI/Dockerfile . -t produtosapi:${{ steps.vars.outputs.tag }}
