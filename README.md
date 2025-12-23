@@ -63,7 +63,7 @@ DELETE /api/produtos/{id} → Remove produto
 
  Implementar autenticação e autorização com JWT &#x2705;
 
- Adicionar camada de testes unitários
+ Adicionar camada de testes unitários Atualizar aqui
 
  Configurar Docker para facilitar deploy
 
