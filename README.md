@@ -66,6 +66,7 @@ Diferenciais técnicos:
 | DELETE | /api/produtos/{id} | Remoção lógica/física
 
 🔮 Roadmap & Melhorias
+
 [x] Implementação de CRUD Básico
 
 [ ] Autenticação e Autorização com JWT (Bearer Token)
