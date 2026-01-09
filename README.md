@@ -67,9 +67,13 @@ Diferenciais técnicos:
 
 🔮 Roadmap & Melhorias
 [x] Implementação de CRUD Básico
+
 [ ] Autenticação e Autorização com JWT (Bearer Token)
+
 [ ] Implementação de Testes Unitários (xUnit)
+
 [ ] Containerização com Docker
+
 [ ] Pipeline de CI/CD (GitHub Actions)
 
 ---
