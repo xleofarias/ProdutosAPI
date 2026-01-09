@@ -18,7 +18,7 @@ Diferenciais técnicos:
 * **ORM:** Entity Framework Core (Abordagem Code-First com Migrations)
 * **Banco de Dados:** SQL Server
 * **Documentação:** Swagger (OpenAPI)
-* **Validações:** Data Annotations / FluentValidation (se tiver)
+* **Validações:** Data Annotations
 
 ## ⚙️ Como Executar Localmente
 
@@ -69,13 +69,13 @@ Diferenciais técnicos:
 
 [x] Implementação de CRUD Básico
 
-[ ] Autenticação e Autorização com JWT (Bearer Token)
+[x] Autenticação e Autorização com JWT (Bearer Token)
 
-[ ] Implementação de Testes Unitários (xUnit)
+[x] Implementação de Testes Unitários (xUnit)
 
-[ ] Containerização com Docker
+[x] Containerização com Docker
 
-[ ] Pipeline de CI/CD (GitHub Actions)
+[x] Pipeline de CI/CD (GitHub Actions)
 
 ---
 Desenvolvido por Leonardo Farias LinkedIn | Portfólio
