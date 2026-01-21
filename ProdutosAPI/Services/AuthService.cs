@@ -16,7 +16,7 @@ namespace ProdutosAPI.Services
         {
             _jwtKey = configuration["Jwt:Key"];
         }
-        public string GenerateToken(Usuarios usuario)
+        public string GenerateToken(User user)
         {
             //Instancia do manipulador de tokens
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -25,9 +25,9 @@ namespace ProdutosAPI.Services
             var key = Encoding.ASCII.GetBytes(_jwtKey);
 
             //Criação dos claims
-            var claims = RoleClaimExtension.GetClaims(usuario);
+            var claims = RoleClaimExtension.GetClaims(user);
 
-            var TokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            var TokenDescriptor = new SecurityTokenDescriptor
             {
                 //Claims que irão compor o token
                 Subject = new System.Security.Claims.ClaimsIdentity(claims), 

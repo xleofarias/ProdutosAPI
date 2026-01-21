@@ -16,7 +16,7 @@ namespace ProdutosAPI.Extensions
 
         public Token() { }
 
-        public string GenerateToken(Usuarios usuario)
+        public string GenerateToken(User usuario)
         {
             //Instancia do manipulador de tokens
             var tokenHandler = new JwtSecurityTokenHandler();

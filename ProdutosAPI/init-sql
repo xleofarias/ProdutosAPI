@@ -1,2 +1,1 @@
-CREATE DATABASE Produtos;
-GO
+CREATE DATABASE Products;

@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
+using ProdutosAPI.Data;
 using ProdutosAPI.Datas;
 using ProdutosAPI.Middlewares;
+using ProdutosAPI.Repositories;
+using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services;
 using ProdutosAPI.Services.Interfaces;
 using System.Reflection;
@@ -50,7 +54,7 @@ internal class Program
 
             c.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "ProdutosAPI",
+                Title = "Products",
                 Version = "v1"
             });
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
@@ -79,19 +83,24 @@ internal class Program
         });
 
         //Add DbContext
-        builder.Services.AddDbContext<ProdutosDBContext>(options =>
+        builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("ProdutosAPI"),
                 sqlOptions => sqlOptions.EnableRetryOnFailure(
                     maxRetryCount: 10,
                     maxRetryDelay: TimeSpan.FromSeconds(5),
                     errorNumbersToAdd: null
                     )));
-        
-       // builder.Services.BuildServiceProvider().GetService<ProdutosDBContext>().Database.Migrate();
+
+        // builder.Services.BuildServiceProvider().GetService<ProdutosDBContext>().Database.Migrate();
+
+
+        // Add Repositories
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
 
         //Add Services
-        builder.Services.AddScoped<IProdutosService, ProdutosService>();
-        builder.Services.AddScoped<IUsuarioService, UsuariosService>();
+        builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddTransient<IAuthService, AuthService>();
 
         var app = builder.Build();

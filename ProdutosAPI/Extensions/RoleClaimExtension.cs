@@ -9,15 +9,15 @@ namespace ProdutosAPI.Extensions
     /// </summary>
     public static class RoleClaimExtension
     {
-        public static IEnumerable<Claim> GetClaims(this Usuarios usuario)
+        public static IEnumerable<Claim> GetClaims(this User user)
         {
             // Cria uma lista de claims com as informações do usuário
             var result = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                new Claim(ClaimTypes.Name, usuario.Nome),
-                new Claim(ClaimTypes.Email, usuario.Email),
-                new Claim(ClaimTypes.Role, usuario.Role.Nome)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role.Nome)
             };
 
             return result;

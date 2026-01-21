@@ -2,20 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProdutosAPI.Datas;
+using ProdutosAPI.Data;
 
 #nullable disable
 
 namespace ProdutosAPI.Migrations
 {
-    [DbContext(typeof(ProdutosDBContext))]
-    [Migration("20250922011938_BancoV2")]
-    partial class BancoV2
+    [DbContext(typeof(AppDbContext))]
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,7 +21,7 @@ namespace ProdutosAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ProdutosAPI.Models.Produtos", b =>
+            modelBuilder.Entity("ProdutosAPI.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -32,29 +29,27 @@ namespace ProdutosAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Nome")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("VARCHAR")
-                        .HasColumnName("Nome");
+                        .HasColumnType("nvarchar(128)");
 
-                    b.Property<decimal>("Preco")
-                        .HasColumnType("DECIMAL")
-                        .HasColumnName("Preco");
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Quantidade")
-                        .HasColumnType("INT")
-                        .HasColumnName("Quantidade");
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Nome")
+                    b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Produtos", (string)null);
+                    b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("ProdutosAPI.Models.Roles", b =>
+            modelBuilder.Entity("ProdutosAPI.Models.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -71,9 +66,21 @@ namespace ProdutosAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Nome = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Nome = "User"
+                        });
                 });
 
-            modelBuilder.Entity("ProdutosAPI.Models.Usuarios", b =>
+            modelBuilder.Entity("ProdutosAPI.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -93,7 +100,7 @@ namespace ProdutosAPI.Migrations
                         .HasColumnType("VARCHAR")
                         .HasColumnName("Login");
 
-                    b.Property<string>("Nome")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("NVARCHAR")
@@ -121,12 +128,12 @@ namespace ProdutosAPI.Migrations
                     b.HasIndex(new[] { "Slug" }, "IX_User_Slug")
                         .IsUnique();
 
-                    b.ToTable("Usuarios", (string)null);
+                    b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("ProdutosAPI.Models.Usuarios", b =>
+            modelBuilder.Entity("ProdutosAPI.Models.User", b =>
                 {
-                    b.HasOne("ProdutosAPI.Models.Roles", "Role")
+                    b.HasOne("ProdutosAPI.Models.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)

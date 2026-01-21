@@ -1,19 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Services.Interfaces;
 
 namespace ProdutosAPI.Controllers
 {
-    [Route("api/produtos")]
+    [Route("api/products")]
     [ApiController]
-    public class ProdutosController : ControllerBase
+    public class ProductController : ControllerBase
     {
-        public readonly IProdutosService _produtos;
+        private readonly IProductService _productsService;
 
         // Injeção de dependência do serviço de produtos
-        public ProdutosController(IProdutosService produtos)
+        public ProductController(IProductService products)
         {
-            _produtos = produtos;
+            _productsService = products;
         }
 
         /// <summary>Buscar Produto pelo Código</summary>
@@ -24,11 +25,11 @@ namespace ProdutosAPI.Controllers
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Dados do produto com base no código passado: <paramref name="id"/></returns>
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ProdutosDTO>> GetProdutosById(int id)
+        [Authorize("Admin")]
+        public async Task<ActionResult<ProductDTO>> GetByIdAsync(int id)
         {
-            var produto = await _produtos.GetProdutosById(p => p.Id == id);
-
-            return Ok(produto);
+            var product = await _productsService.GetByFindAsync(p => p.Id == id);
+            return Ok(product);
         }
 
         ///<summary>Buscar todos os produtos</summary>
@@ -37,12 +38,12 @@ namespace ProdutosAPI.Controllers
         /// <response code="404">Nenhum produto foi encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Dados de todos os produtos cadastrados</returns>
+        [Authorize("Admin")]
         [HttpGet]
-        public async Task<ActionResult<ProdutosDTO>> GetProdutos()
+        public async Task<ActionResult<ProductDTO>> GetAllAsync()
         {
-            var produtos = await _produtos.GetProdutos();
-
-            return Ok(produtos);
+            var products = await _productsService.GetAllAsync();
+            return Ok(products);
         }
 
         ///<summary>Cadastrar um novo produto</summary>
@@ -50,14 +51,13 @@ namespace ProdutosAPI.Controllers
         /// <response code="201">Produto cadastrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Retorna os dados produto cadastrado</returns>
+        [Authorize("Admin")]
         [HttpPost]
-        public async Task<ActionResult<ProdutosAPI.Models.Produtos>> PostProdutos(ProdutosDTO produto)
+        public async Task<ActionResult<ProductDTO>> PostAsync(ProductDTO product)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var newProduct = await _productsService.CreateAsync(product);
 
-            var produtoNovo = await _produtos.PostProdutos(produto);
-
-            return CreatedAtAction(nameof(GetProdutosById), new { id = produtoNovo.Id }, produto);
+            return CreatedAtAction(nameof(GetByIdAsync), new { id = newProduct.Id }, product);
         }
 
         ///<summary>Atualizar os dados do produto</summary>
@@ -67,12 +67,11 @@ namespace ProdutosAPI.Controllers
         /// <response code="404">Produto não encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Produto atualizado com sucesso</returns>
+        [Authorize("Admin")]
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> PutProdutos(int id, ProdutosDTO produto)
+        public async Task<IActionResult> PutAsync(int id, ProductDTO product)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            await _produtos.PutProdutos(id, produto);
+            await _productsService.UpdateAsync(id, product);
 
             return NoContent();
         }
@@ -83,10 +82,11 @@ namespace ProdutosAPI.Controllers
         /// <response code="404">Produto não encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Produto deletado com sucesso</returns>
+        [Authorize("Admin")]
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteProdutos(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
-            var produtoDeletado = await _produtos.DeleteProdutos(id);
+            await _productsService.DeleteAsync(id);
 
             return NoContent();
         }

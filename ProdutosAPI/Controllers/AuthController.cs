@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using ProdutosAPI.Data;
 using ProdutosAPI.Datas;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Services.Interfaces;
@@ -14,9 +14,9 @@ namespace ProdutosAPI.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ProdutosDBContext _context;
+        private readonly AppDbContext _context;
         private readonly IAuthService _auth;
-        public AuthController(ProdutosDBContext context, IAuthService auth)
+        public AuthController(AppDbContext context, IAuthService auth)
         {
             _context = context;
             _auth = auth;
@@ -26,7 +26,7 @@ namespace ProdutosAPI.Controllers
         [HttpPost]  
         public async Task<ActionResult<string>> PostToken([FromBody] LoginDTO login)
         {
-            var usuario = await _context.Usuarios
+            var usuario = await _context.Users
                 .Include(x => x.Role)
                 .FirstOrDefaultAsync(x => x.Email == login.Email);
 

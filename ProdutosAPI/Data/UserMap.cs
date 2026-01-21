@@ -4,12 +4,12 @@ using ProdutosAPI.Models;
 
 namespace ProdutosAPI.Datas
 {
-    public class UserMap : IEntityTypeConfiguration<Usuarios>
+    public class UserMap : IEntityTypeConfiguration<User>
     {
-        public void Configure(EntityTypeBuilder<Usuarios> builder) 
+        public void Configure(EntityTypeBuilder<User> builder) 
         {
             // Define a tabela
-            builder.ToTable("Usuarios");
+            builder.ToTable("Users");
 
             // Define a chave primária
             builder.HasKey(builder => builder.Id);
@@ -20,7 +20,7 @@ namespace ProdutosAPI.Datas
                 .UseIdentityColumn();
 
             // Define as Propriedades
-            builder.Property(builder => builder.Nome)
+            builder.Property(builder => builder.Name)
                 .IsRequired()
                 .HasColumnName("Nome")
                 .HasColumnType("NVARCHAR")
