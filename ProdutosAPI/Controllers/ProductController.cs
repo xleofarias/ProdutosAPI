@@ -5,6 +5,7 @@ using ProdutosAPI.Services.Interfaces;
 
 namespace ProdutosAPI.Controllers
 {
+    [Authorize]
     [Route("api/products")]
     [ApiController]
     public class ProductController : ControllerBase

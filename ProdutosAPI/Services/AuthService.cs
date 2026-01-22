@@ -4,19 +4,49 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using ProdutosAPI.Extensions;
 using Microsoft.IdentityModel.Tokens;
+using ProdutosAPI.Repositories.Interfaces;
+using ProdutosAPI.DTOs;
+using SecureIdentity.Password;
 
 namespace ProdutosAPI.Services
 {
     // Serviço de autenticação
     public class AuthService : IAuthService
     {
+        private readonly IUserRepository _userRepository;
         private readonly string _jwtKey;
 
-        public AuthService(IConfiguration configuration)
+        public AuthService(IUserRepository userRepository,IConfiguration configuration)
         {
+            _userRepository = userRepository;
             _jwtKey = configuration["Jwt:Key"];
         }
-        public string GenerateToken(User user)
+        public async Task<LoginReponseDto> LoginAsync(LoginRequestDto login)
+        {
+            // Busca o usuário pelo email
+            var user = await _userRepository.GetByEmailWithRoleAsync(login.Email);
+
+            if (user == null)
+            {
+                throw new Exception("Usuário não encontrado");
+            };
+
+            // Verifica se a senha está correta
+            if(!PasswordHasher.Verify(user.PasswordHash, login.Senha))
+            {
+                throw new Exception("Senha inválida");
+            };
+
+            var token = GenerateToken(user);
+
+            return new LoginReponseDto
+            {
+                Email = user.Email,
+                Token = token
+            };
+        }
+
+        private string GenerateToken(User user)
         {
             //Instancia do manipulador de tokens
             var tokenHandler = new JwtSecurityTokenHandler();

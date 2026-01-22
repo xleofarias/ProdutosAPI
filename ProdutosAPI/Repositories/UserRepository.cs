@@ -26,8 +26,17 @@ namespace ProdutosAPI.Repositories
         public async Task<User?> GetAsync(Expression<Func<User, bool>> predicate)
         {
             return await _context.Users
+                .Include(u => u.Role)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(predicate);
+        }
+
+        public async Task<User?> GetByEmailWithRoleAsync(string email)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<bool> UpdateRoleAsync(int userId, int newRoleId)

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProdutosAPI.DTOs
 {
-    public class LoginDTO
+    public class LoginRequestDto
     {
         [Required(ErrorMessage = "Email é obrigatório")]
         [EmailAddress(ErrorMessage = "O Email deve ser válido")]

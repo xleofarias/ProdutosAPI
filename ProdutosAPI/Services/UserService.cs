@@ -1,4 +1,7 @@
-﻿using ProdutosAPI.DTOs;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Identity;
+using ProdutosAPI.DTOs;
+using ProdutosAPI.Enums;
 using ProdutosAPI.Models;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
@@ -38,6 +41,8 @@ namespace ProdutosAPI.Services
                 RoleId = user.RoleId
             };
 
+            var roleName = ((ERole)userNew.RoleId).ToString();
+
             try
             {
                 await _userRepository.CreateAsync(userNew);
@@ -47,14 +52,14 @@ namespace ProdutosAPI.Services
                 throw new Exception($"Error registering user: {ex.Message}");
             }
 
-            return new UserResponseDto(userNew.Id, userNew.Name, userNew.Email, userNew.Role.Nome);
+            return new UserResponseDto(userNew.Id, userNew.Name, userNew.Email, roleName);
         }
 
         public async Task<UserResponseDto?> GetAsync(Expression<Func<User, bool>> predicate)
         {
             var user = await _userRepository.GetAsync(predicate);
 
-
+            var roleName = ((ERole)user.RoleId).ToString();
 
             if (user == null) 
             {
