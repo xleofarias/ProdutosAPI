@@ -25,9 +25,9 @@ namespace ProdutosAPI.Controllers
         /// <response code="404">Produto não encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Dados do produto com base no código passado: <paramref name="id"/></returns>
-        [HttpGet("{id:int}")]
-        [Authorize("Admin")]
-        public async Task<ActionResult<ProductDTO>> GetByIdAsync(int id)
+        [HttpGet("{id:int}", Name = "GetByFindAsync")]
+        [Authorize(Roles="Admin")]
+        public async Task<ActionResult<ProductDTO>> GetByFindAsync(int id)
         {
             var product = await _productsService.GetByFindAsync(p => p.Id == id);
             return Ok(product);
@@ -39,8 +39,8 @@ namespace ProdutosAPI.Controllers
         /// <response code="404">Nenhum produto foi encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Dados de todos os produtos cadastrados</returns>
-        [Authorize("Admin")]
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDTO>> GetAllAsync()
         {
             var products = await _productsService.GetAllAsync();
@@ -52,13 +52,13 @@ namespace ProdutosAPI.Controllers
         /// <response code="201">Produto cadastrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Retorna os dados produto cadastrado</returns>
-        [Authorize("Admin")]
         [HttpPost]
+        [Authorize(Roles="Admin")]
         public async Task<ActionResult<ProductDTO>> PostAsync(ProductDTO product)
         {
             var newProduct = await _productsService.CreateAsync(product);
 
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = newProduct.Id }, product);
+            return CreatedAtRoute(nameof(GetByFindAsync), new { id = newProduct.Id }, newProduct);
         }
 
         ///<summary>Atualizar os dados do produto</summary>
@@ -68,8 +68,8 @@ namespace ProdutosAPI.Controllers
         /// <response code="404">Produto não encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Produto atualizado com sucesso</returns>
-        [Authorize("Admin")]
         [HttpPut("{id:int}")]
+        [Authorize(Roles="Admin")]
         public async Task<IActionResult> PutAsync(int id, ProductDTO product)
         {
             await _productsService.UpdateAsync(id, product);
@@ -83,8 +83,8 @@ namespace ProdutosAPI.Controllers
         /// <response code="404">Produto não encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Produto deletado com sucesso</returns>
-        [Authorize("Admin")]
         [HttpDelete("{id:int}")]
+        [Authorize(Roles="Admin")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             await _productsService.DeleteAsync(id);
