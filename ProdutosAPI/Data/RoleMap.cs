@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProdutosAPI.Models;
+using ProdutosAPI.Enums;
 
 namespace ProdutosAPI.Datas
 {
-    public class RoleMap : IEntityTypeConfiguration<Roles>
+    public class RoleMap : IEntityTypeConfiguration<Role>
     {
-        public void Configure(EntityTypeBuilder<Roles> builder)
+        public void Configure(EntityTypeBuilder<Role> builder)
         {
             // Define a tabela
             builder.ToTable("Roles");
@@ -25,6 +26,19 @@ namespace ProdutosAPI.Datas
                 .HasColumnName("Nome")
                 .HasColumnType("VARCHAR")
                 .HasMaxLength(128);
+
+            builder.HasData(
+                new Role
+                {
+                    Id = (int)ERole.Admin,
+                    Nome = "Admin"
+                },
+                new Role
+                {
+                    Id = (int)ERole.User,
+                    Nome = "User"
+                }
+            );
         }
     }
 }

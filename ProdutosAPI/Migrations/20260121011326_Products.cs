@@ -5,36 +5,25 @@
 namespace ProdutosAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class BancoV2 : Migration
+    public partial class Products : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
-                name: "Quantidade",
-                table: "Produtos",
-                type: "INT",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int");
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "Preco",
-                table: "Produtos",
-                type: "DECIMAL(18,0)",
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(18,2)");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Nome",
-                table: "Produtos",
-                type: "VARCHAR(128)",
-                maxLength: 128,
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(100)",
-                oldMaxLength: 100);
+            migrationBuilder.CreateTable(
+                name: "Products",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Products", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Roles",
@@ -50,7 +39,7 @@ namespace ProdutosAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Usuarios",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -64,9 +53,9 @@ namespace ProdutosAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Usuarios", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Usuarios_Roles_RoleId",
+                        name: "FK_Users_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "Id",
@@ -74,20 +63,20 @@ namespace ProdutosAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Produtos_Nome",
-                table: "Produtos",
-                column: "Nome",
+                name: "IX_Products_Name",
+                table: "Products",
+                column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_Slug",
-                table: "Usuarios",
+                table: "Users",
                 column: "Slug",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Usuarios_RoleId",
-                table: "Usuarios",
+                name: "IX_Users_RoleId",
+                table: "Users",
                 column: "RoleId");
         }
 
@@ -95,40 +84,13 @@ namespace ProdutosAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Usuarios");
+                name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Roles");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Produtos_Nome",
-                table: "Produtos");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Quantidade",
-                table: "Produtos",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INT");
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "Preco",
-                table: "Produtos",
-                type: "decimal(18,2)",
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "DECIMAL(18,0)");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Nome",
-                table: "Produtos",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "VARCHAR(128)",
-                oldMaxLength: 128);
         }
     }
 }

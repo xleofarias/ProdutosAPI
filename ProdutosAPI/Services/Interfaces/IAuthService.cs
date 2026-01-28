@@ -1,10 +1,11 @@
-﻿using ProdutosAPI.Models;
+﻿using ProdutosAPI.DTOs;
+using ProdutosAPI.Models;
 
 namespace ProdutosAPI.Services.Interfaces
 {
     // Interface para o serviço de autenticação
     public interface IAuthService
     {
-        string GenerateToken(Usuarios usuario);
+        Task<LoginReponseDto> LoginAsync(LoginRequestDto login);
     }
 }
