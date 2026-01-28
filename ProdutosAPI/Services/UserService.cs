@@ -59,12 +59,12 @@ namespace ProdutosAPI.Services
         {
             var user = await _userRepository.GetAsync(predicate);
 
-            var roleName = ((ERole)user.RoleId).ToString();
-
             if (user == null) 
             {
                 throw new KeyNotFoundException("Usuário não encontrado");
             }
+
+            var roleName = ((ERole)user.RoleId).ToString();
 
             return new UserResponseDto(user.Id, user.Name, user.Email, user.Role.Nome);
         }
