@@ -20,7 +20,8 @@ namespace ProdutosAPITests.Services
                 Id = 1,
                 Name = "Teste",
                 Email = "email@gmail.com",
-                RoleId = 1
+                RoleId = 1,
+                Role = new Role { Id = 1, Nome = "Admin" }
             };
 
             // Configura o comportamento simulado
