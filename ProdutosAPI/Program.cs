@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using ProdutosAPI.Data;
-using ProdutosAPI.Datas;
 using ProdutosAPI.Middlewares;
 using ProdutosAPI.Repositories;
 using ProdutosAPI.Repositories.Interfaces;
@@ -32,11 +30,13 @@ internal class Program
             a.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(a =>
         {
+            a.RequireHttpsMetadata = true;
+            a.SaveToken = true;
             // Configura os parâmetros de validação do token
             a.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true, //Valida a chave de assinatura do token
-                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"])), //Define a chave de assinatura
+                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key), //Define a chave de assinatura
                 ValidateIssuer = false, //Não valida o emissor do token
                 ValidateAudience = false //Não valida o destinatário do token
             };
@@ -68,7 +68,7 @@ internal class Program
             });
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                {   
+                {
                     new OpenApiSecurityScheme
                     {
                         Reference = new OpenApiReference
@@ -101,7 +101,7 @@ internal class Program
         //Add Services
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<IUserService, UserService>();
-        builder.Services.AddTransient<IAuthService, AuthService>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
 
         var app = builder.Build();
 
@@ -117,6 +117,8 @@ internal class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
+        
         app.UseAuthorization();
 
         app.MapControllers();
