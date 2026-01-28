@@ -69,14 +69,14 @@ namespace ProdutosAPI.Services
             return new UserResponseDto(user.Id, user.Name, user.Email, user.Role.Nome);
         }
 
-        public Task<bool> UpdateRoleAsync(int userId, int newRoleId)
+        public async Task<bool> UpdateRoleAsync(int userId, int newRoleId)
         {
-            var user = _userRepository.GetAsync(u => u.Id == userId);
+            var user = await _userRepository.GetAsync(u => u.Id == userId);
 
             if(user == null)
                 throw new KeyNotFoundException("Usuário não encontrado");
 
-            return _userRepository.UpdateRoleAsync(userId, newRoleId);
+            return await _userRepository.UpdateRoleAsync(userId, newRoleId);
         }
     }
 }
