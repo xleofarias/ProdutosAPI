@@ -73,7 +73,7 @@ namespace ProdutosAPI.Services
         {
             var user = _userRepository.GetAsync(u => u.Id == userId);
 
-            if(user is null)
+            if(user == null)
                 throw new KeyNotFoundException("Usuário não encontrado");
 
             return _userRepository.UpdateRoleAsync(userId, newRoleId);

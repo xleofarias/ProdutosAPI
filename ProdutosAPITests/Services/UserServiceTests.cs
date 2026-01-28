@@ -74,7 +74,9 @@ namespace ProdutosAPITests.Services
                 Id = 1,
                 Name = "Teste",
                 Email = "email@gmail.com",
-                Login = "User"
+                Login = "User",
+                RoleId = 1,
+                Role = new Role { Id = 1, Nome ="Admin"}
             };
 
             mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
