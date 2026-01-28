@@ -156,7 +156,7 @@ namespace ProdutosAPITests.Services
             //Act - Ação
             var ex = await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(requestDTO));
 
-            Assert.Equal("Product with the same name already exists.", ex.Message);
+            Assert.Equal("Já existe um produto com esse nome cadastrado", ex.Message);
 
             mockRepo.Verify(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()), Times.Once);
 
