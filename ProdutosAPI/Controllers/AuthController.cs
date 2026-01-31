@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Services.Interfaces;
-using SecureIdentity.Password;
-
 
 namespace ProdutosAPI.Controllers
 {
@@ -19,7 +17,8 @@ namespace ProdutosAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost]  
+        [HttpPost]
+        [EnableRateLimiting(policyName:"login-limit")]
         public async Task<ActionResult<LoginReponseDto>> PostToken([FromBody] LoginRequestDto login)
         {
 

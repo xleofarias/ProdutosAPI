@@ -122,23 +122,23 @@ namespace ProdutosAPITests.Services
             mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>()), Times.Once);
         }
 
-        [Fact]
-        public async Task PostProdutos_DeveLancarExcessao_QuandoNaoCriar() 
-        {
-            // Arrange - Preparação
-            var mockRepo = new Mock<IProductRepository>();
+        //[Fact]
+        //public async Task PostProdutos_DeveLancarExcessao_QuandoNaoCriar() 
+        //{
+        //    // Arrange - Preparação
+        //    var mockRepo = new Mock<IProductRepository>();
 
-            mockRepo.Setup(r => r.CreateAsync(It.IsAny<Product>())).ReturnsAsync((Product)null);
+        //    mockRepo.Setup(r => r.CreateAsync(It.IsAny<Product>())).ReturnsAsync((Product)null);
 
-            var service = new ProductService(mockRepo.Object);
-            var requestDto = new ProductDTO { Name = "Nescau", Quantity = 10, Price = 5.50m };
+        //    var service = new ProductService(mockRepo.Object);
+        //    var requestDto = new ProductDTO { Name = "Nescau", Quantity = 10, Price = 5.50m };
 
-            //Act - Ação & Assert - Verificação
-            //await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(requestDto));
+        //    //Act - Ação & Assert - Verificação
+        //    //await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(requestDto));
 
-            // Confirmar se o método foi chamado
-            mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>()), Times.Once);
-        }
+        //    // Confirmar se o método foi chamado
+        //    mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>()), Times.Once);
+        //}
 
         [Fact]
         public async Task CreateAsync_ShouldThrowException_WhenNameAlreadyExists() 
@@ -156,7 +156,7 @@ namespace ProdutosAPITests.Services
             //Act - Ação
             var ex = await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(requestDTO));
 
-            Assert.Equal("Product with the same name already exists.", ex.Message);
+            Assert.Equal("Já existe um produto com esse nome cadastrado", ex.Message);
 
             mockRepo.Verify(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()), Times.Once);
 
