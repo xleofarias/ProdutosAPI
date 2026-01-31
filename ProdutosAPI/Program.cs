@@ -8,6 +8,8 @@ using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services;
 using ProdutosAPI.Services.Interfaces;
 using System.Reflection;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 internal class Program
 {
@@ -41,6 +43,23 @@ internal class Program
                 ValidateAudience = false //Não valida o destinatário do token
             };
         });
+
+        // Configuração do Rate Limiter Anti-BruteForce
+        builder.Services.AddRateLimiter(options =>
+        {
+            // Quando bloquear, devolve status 429 (Too Many Requests)
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            // Cria uma política chamada "login-limit"
+            options.AddFixedWindowLimiter(policyName: "login-limit", options =>
+            {
+                options.PermitLimit = 5; // Permite apenas 5 tentativas
+                options.Window = TimeSpan.FromMinutes(3); // A cada 3 minutos
+                options.QueueLimit = 0; // Não deixa ninguém na fila de espera, rejeita na hora
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            });
+        });
+
 
         builder.Services.AddSwaggerGen(c =>
         {
@@ -103,6 +122,10 @@ internal class Program
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
 
+
+
+
+
         var app = builder.Build();
 
         //Adiciona o middleware de tratamento de exceções
@@ -113,9 +136,17 @@ internal class Program
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler("/error"); 
+            app.UseHsts(); // FORÇA USAR HTTPS
         }
 
         app.UseHttpsRedirection();
+
+        app.UseRateLimiter();
 
         app.UseAuthentication();
         
