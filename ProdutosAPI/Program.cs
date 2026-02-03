@@ -49,18 +49,10 @@ internal class Program
         {
             options.AddPolicy("AllowFrontend", policy =>
             {
-                if (builder.Environment.IsDevelopment())
-                {
+
                     policy.AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader();
-                }
-                else
-                {
-                    policy.WithOrigins("https://productapi-e383.onrender.com")
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-                }
             });
         });
 
@@ -152,11 +144,12 @@ internal class Program
         //Adiciona o middleware de tratamento de exceções
         app.UseMiddleware<BackofficeExceptionHandlerMiddleware>();
 
+        app.UseSwagger();
+        app.UseSwaggerUI();
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
         }
         else
