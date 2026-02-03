@@ -55,12 +55,12 @@ internal class Program
                     .AllowAnyMethod()
                     .AllowAnyHeader();
                 }
-                //else
-                //{
-                //    policy.WithOrigins("https://meusite.com")
-                //    .AllowAnyMethod()
-                //    .AllowAnyHeader();
-                //}
+                else
+                {
+                    policy.WithOrigins("https://productapi-e383.onrender.com")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                }
             });
         });
 
