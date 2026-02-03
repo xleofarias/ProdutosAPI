@@ -44,6 +44,26 @@ internal class Program
             };
         });
 
+        // Add Cors
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend", policy =>
+            {
+                if (builder.Environment.IsDevelopment())
+                {
+                    policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                }
+                //else
+                //{
+                //    policy.WithOrigins("https://meusite.com")
+                //    .AllowAnyMethod()
+                //    .AllowAnyHeader();
+                //}
+            });
+        });
+
         // Configuração do Rate Limiter Anti-BruteForce
         builder.Services.AddRateLimiter(options =>
         {
@@ -145,6 +165,8 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
+
+        app.UseCors("AllowFrontend");
 
         app.UseRateLimiter();
 
