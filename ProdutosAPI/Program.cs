@@ -123,12 +123,17 @@ internal class Program
 
         //Add DbContext
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("ProdutosAPI"),
+            options.UseNpgsql(builder.Configuration.GetConnectionString("ProdutosAPI"),
                 sqlOptions => sqlOptions.EnableRetryOnFailure(
                     maxRetryCount: 10,
                     maxRetryDelay: TimeSpan.FromSeconds(5),
-                    errorNumbersToAdd: null
+                    errorCodesToAdd: null//,
+                    //errorNumbersToAdd: null
                     )));
+
+
+        //Add HealthCheck
+        builder.Services.AddHealthChecks();
 
         // builder.Services.BuildServiceProvider().GetService<ProdutosDBContext>().Database.Migrate();
 
@@ -141,10 +146,6 @@ internal class Program
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
-
-
-
-
 
         var app = builder.Build();
 
@@ -173,6 +174,8 @@ internal class Program
         app.UseAuthentication();
         
         app.UseAuthorization();
+
+        app.MapHealthChecks("/health");
 
         app.MapControllers();
 
