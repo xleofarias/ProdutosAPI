@@ -47,7 +47,7 @@ namespace ProdutosAPI.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "NVARCHAR", maxLength: 80, nullable: false),
+                    Nome = table.Column<string>(type: "VARCHAR", maxLength: 80, nullable: false),
                     Email = table.Column<string>(type: "VARCHAR", maxLength: 160, nullable: false),
                     Login = table.Column<string>(type: "VARCHAR", maxLength: 20, nullable: false),
                     PasswordHash = table.Column<string>(type: "VARCHAR", maxLength: 255, nullable: false),

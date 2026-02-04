@@ -11,7 +11,7 @@ using ProdutosAPI.Data;
 namespace ProdutosAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260204025213_Products")]
+    [Migration("20260204025719_Products")]
     partial class Products
     {
         /// <inheritdoc />
@@ -106,7 +106,7 @@ namespace ProdutosAPI.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("NVARCHAR")
+                        .HasColumnType("VARCHAR")
                         .HasColumnName("Nome");
 
                     b.Property<string>("PasswordHash")

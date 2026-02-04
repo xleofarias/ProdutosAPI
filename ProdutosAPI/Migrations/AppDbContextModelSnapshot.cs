@@ -103,7 +103,7 @@ namespace ProdutosAPI.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("NVARCHAR")
+                        .HasColumnType("VARCHAR")
                         .HasColumnName("Nome");
 
                     b.Property<string>("PasswordHash")
