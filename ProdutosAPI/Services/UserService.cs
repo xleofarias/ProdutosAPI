@@ -7,6 +7,7 @@ using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
 using SecureIdentity.Password;
 using System.Linq.Expressions;
+using BCrypt.Net;
 
 namespace ProdutosAPI.Services
 {
@@ -36,7 +37,7 @@ namespace ProdutosAPI.Services
                 Name = user.Name,
                 Email = user.Email,
                 Login = user.Login,
-                PasswordHash = PasswordHasher.Hash(user.Password),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password),
                 Slug = user.Name.ToLower().Replace(" ", "-"),
                 RoleId = user.RoleId
             };
