@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace ProdutosAPI.Migrations
 {
@@ -14,11 +17,11 @@ namespace ProdutosAPI.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    Price = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,9 +32,9 @@ namespace ProdutosAPI.Migrations
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "VARCHAR(128)", maxLength: 128, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nome = table.Column<string>(type: "VARCHAR", maxLength: 128, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,14 +45,14 @@ namespace ProdutosAPI.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "NVARCHAR(80)", maxLength: 80, nullable: false),
-                    Email = table.Column<string>(type: "VARCHAR(160)", maxLength: 160, nullable: false),
-                    Login = table.Column<string>(type: "VARCHAR(20)", maxLength: 20, nullable: false),
-                    PasswordHash = table.Column<string>(type: "VARCHAR(255)", maxLength: 255, nullable: false),
-                    Slug = table.Column<string>(type: "VARCHAR(80)", maxLength: 80, nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nome = table.Column<string>(type: "NVARCHAR", maxLength: 80, nullable: false),
+                    Email = table.Column<string>(type: "VARCHAR", maxLength: 160, nullable: false),
+                    Login = table.Column<string>(type: "VARCHAR", maxLength: 20, nullable: false),
+                    PasswordHash = table.Column<string>(type: "VARCHAR", maxLength: 255, nullable: false),
+                    Slug = table.Column<string>(type: "VARCHAR", maxLength: 80, nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,6 +63,15 @@ namespace ProdutosAPI.Migrations
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Nome" },
+                values: new object[,]
+                {
+                    { 1, "Admin" },
+                    { 2, "User" }
                 });
 
             migrationBuilder.CreateIndex(
