@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.DTOs;
 using SecureIdentity.Password;
+using BCrypt.Net;
 
 namespace ProdutosAPI.Services
 {
@@ -32,7 +33,7 @@ namespace ProdutosAPI.Services
             };
 
             // Verifica se a senha está correta
-            if(!PasswordHasher.Verify(user.PasswordHash, login.Senha))
+            if(!BCrypt.Net.BCrypt.Verify(user.PasswordHash, login.Senha))
             {
                 throw new Exception("Senha inválida");
             };
