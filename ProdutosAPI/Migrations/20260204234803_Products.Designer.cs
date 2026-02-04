@@ -11,7 +11,7 @@ using ProdutosAPI.Data;
 namespace ProdutosAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260204025719_Products")]
+    [Migration("20260204234803_Products")]
     partial class Products
     {
         /// <inheritdoc />

@@ -10,8 +10,6 @@ using ProdutosAPI.Services.Interfaces;
 using System.Reflection;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
-using Microsoft.OpenApi.Validations;
-using System.Threading.Tasks;
 
 internal class Program
 {
