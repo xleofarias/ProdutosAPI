@@ -21,6 +21,7 @@ namespace ProdutosAPI.Data
                 Login = "leomw2",
                 Email = "leofarias.bliz@gmail.com",
                 RoleId = 1,
+                Slug = "Administrador"
 
                 //Geração do hash da senha
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(configuration["AdminPassword"])
