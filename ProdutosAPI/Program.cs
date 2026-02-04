@@ -17,6 +17,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
+        //Incluído para tratar o problema de data por conta do postgresql
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
         var builder = WebApplication.CreateBuilder(args);

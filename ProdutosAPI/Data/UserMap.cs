@@ -23,7 +23,7 @@ namespace ProdutosAPI.Datas
             builder.Property(builder => builder.Name)
                 .IsRequired()
                 .HasColumnName("Nome")
-                .HasColumnType("NVARCHAR")
+                .HasColumnType("VARCHAR")
                 .HasMaxLength(80);
 
             builder.Property(builder => builder.Email)
