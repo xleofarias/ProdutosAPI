@@ -10,10 +10,12 @@ using ProdutosAPI.Services.Interfaces;
 using System.Reflection;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Microsoft.OpenApi.Validations;
+using System.Threading.Tasks;
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -127,9 +129,6 @@ internal class Program
         //Add HealthCheck
         builder.Services.AddHealthChecks();
 
-        // builder.Services.BuildServiceProvider().GetService<ProdutosDBContext>().Database.Migrate();
-
-
         // Add Repositories
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -156,6 +155,28 @@ internal class Program
         {
             app.UseExceptionHandler("/error"); 
             app.UseHsts(); // FORÇA USAR HTTPS
+        }
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<AppDbContext>();
+                var configuartion = services.GetRequiredService<IConfiguration>();
+
+                // 1. Aplica as tabelas (Migrations)
+                context.Database.Migrate();
+
+                // 2. Criação do admin
+                await DbSeeder.SeedAdminUser(context, configuartion);
+                
+            }
+            catch(Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "Ocorreu um erro na criação da instância do banco de dados");
+            }
         }
 
         app.UseHttpsRedirection();
