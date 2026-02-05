@@ -34,7 +34,7 @@ namespace ProdutosAPI.Services
                 Name = user.Name,
                 Email = user.Email,
                 Login = user.Login,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password),
+                PasswordHash = PasswordHelper.Hash(user.Password),
                 Slug = user.Name.ToLower().Replace(" ", "-"),
                 RoleId = user.RoleId
             };

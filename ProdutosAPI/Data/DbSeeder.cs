@@ -16,7 +16,7 @@ namespace ProdutosAPI.Data
             }
 
             var adminPassword = configuration["AdminPassword"];
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
+            var passwordHash = PasswordHelper.Hash(adminPassword);
             // 👇 O X-9 (DEBUG): O que estamos tentando salvar?
             Console.WriteLine($"[DEBUG SEEDER] Senha usada: {adminPassword}");
             Console.WriteLine($"[DEBUG SEEDER] Hash gerado: {passwordHash}");
