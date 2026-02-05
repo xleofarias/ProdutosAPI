@@ -4,7 +4,6 @@ using ProdutosAPI.Models;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
-using BCrypt.Net;
 
 namespace ProdutosAPI.Services
 {

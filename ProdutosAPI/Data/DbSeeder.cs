@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using ProdutosAPI.Models;
 using ProdutosAPI.Services;
-using BCrypt.Net;
 
 namespace ProdutosAPI.Data
 {
