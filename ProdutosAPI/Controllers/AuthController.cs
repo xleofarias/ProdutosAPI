@@ -21,7 +21,6 @@ namespace ProdutosAPI.Controllers
         [EnableRateLimiting(policyName:"login-limit")]
         public async Task<ActionResult<LoginReponseDto>> PostToken([FromBody] LoginRequestDto login)
         {
-
             var userLogin = await _authService.LoginAsync(login);
 
             return Ok(userLogin);

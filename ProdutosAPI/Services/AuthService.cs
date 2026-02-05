@@ -35,11 +35,12 @@ namespace ProdutosAPI.Services
             Console.WriteLine($"[DEBUG] Tamanho do Hash: {user.PasswordHash?.Length}");
             Console.WriteLine($"[DEBUG] Senha digitada: '{login.Senha}'");
 
-            //// Verifica se a senha está correta
-            //if (!BCrypt.Net.BCrypt.Verify(user.PasswordHash, login.Senha))
-            //{
-            //    throw new Exception("Senha inválida");
-            //};
+            // Verifica se a senha está correta
+            if (!PasswordHelper.Verify(user.PasswordHash, login.Senha))
+            {
+                throw new Exception("Senha inválida");
+            }
+            ;
 
             var token = GenerateToken(user);
 

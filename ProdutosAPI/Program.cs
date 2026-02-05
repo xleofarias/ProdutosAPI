@@ -141,9 +141,6 @@ internal class Program
 
         var app = builder.Build();
 
-        //Adiciona o middleware de tratamento de exceções
-        app.UseMiddleware<BackofficeExceptionHandlerMiddleware>();
-
         app.UseSwagger();
         app.UseSwaggerUI();
 
@@ -154,9 +151,12 @@ internal class Program
         }
         else
         {
-            app.UseExceptionHandler("/error"); 
+        //    app.UseExceptionHandler("/error"); 
             app.UseHsts(); // FORÇA USAR HTTPS
         }
+
+        //Adiciona o middleware de tratamento de exceções
+        app.UseMiddleware<BackofficeExceptionHandlerMiddleware>();
 
         using (var scope = app.Services.CreateScope())
         {
