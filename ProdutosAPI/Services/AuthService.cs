@@ -6,7 +6,6 @@ using ProdutosAPI.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.DTOs;
-using SecureIdentity.Password;
 using BCrypt.Net;
 
 namespace ProdutosAPI.Services

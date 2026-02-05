@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Identity;
-using ProdutosAPI.DTOs;
+﻿using ProdutosAPI.DTOs;
 using ProdutosAPI.Enums;
 using ProdutosAPI.Models;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
-using SecureIdentity.Password;
 using System.Linq.Expressions;
 using BCrypt.Net;
 
