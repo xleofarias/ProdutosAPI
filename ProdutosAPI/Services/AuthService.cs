@@ -32,8 +32,13 @@ namespace ProdutosAPI.Services
                 throw new Exception("Usuário não encontrado");
             };
 
+            // 👇 O X-9 (DEBUG): O que DIABOS tem nesse banco?
+            Console.WriteLine($"[DEBUG] Hash vindo do banco: '{user.PasswordHash}'");
+            Console.WriteLine($"[DEBUG] Tamanho do Hash: {user.PasswordHash?.Length}");
+            Console.WriteLine($"[DEBUG] Senha digitada: '{login.Senha}'");
+
             // Verifica se a senha está correta
-            if(!BCrypt.Net.BCrypt.Verify(user.PasswordHash, login.Senha))
+            if (!BCrypt.Net.BCrypt.Verify(user.PasswordHash, login.Senha))
             {
                 throw new Exception("Senha inválida");
             };
