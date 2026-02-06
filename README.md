@@ -62,7 +62,7 @@ Se preferir não instalar o banco localmente, suba todo o ambiente com uma linha
    ```bash
    docker-compose up -d --build
    ```
-##🔌 Endpoints Principais
+## 🔌 Endpoints Principais
 
 Método,Rota,Descrição,Auth
 | Método | Endpoint           | Descrição
@@ -74,7 +74,7 @@ Método,Rota,Descrição,Auth
 | PUT    | /api/produtos/{id} | Atualização cadastral
 | DELETE | /api/produtos/{id} | Remoção lógica/física
 
-##🔮 Roadmap & Evolução
+## 🔮 Roadmap & Evolução
 [x] CRUD Completo de Produtos e Usuários
 
 [x] Autenticação JWT e Roles (Admin/User)
