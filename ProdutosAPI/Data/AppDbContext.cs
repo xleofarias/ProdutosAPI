@@ -22,5 +22,21 @@ namespace ProdutosAPI.Data
 
             base.OnModelCreating(modelBuilder);
         }
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder) {
+                // Conversão de Datetime para trabalhar com UTC
+                configurationBuilder.Properties<DateTime>()
+                    .HaveConversion(typeof(UtcDateTimeConverter));
+        }
+
+        // Classe auxiliar para fazer a conversão
+        private class UtcDateTimeConverter : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>
+        {
+            public UtcDateTimeConverter(): base(
+                    // Garante que é UTC
+                    v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                    // Garante que o C# entenda como UTC
+                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+        }
     }
 }
