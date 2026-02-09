@@ -15,8 +15,8 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        //IncluÌdo para tratar o problema de data por conta do postgresql
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        //Inclu√≠do para tratar o problema de data por conta do postgresql
+        //AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
         var builder = WebApplication.CreateBuilder(args);
 
@@ -30,20 +30,20 @@ internal class Program
         var key = System.Text.Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
         builder.Services.AddAuthentication(a =>
         {
-            // Define o esquema de autenticaÁ„o
+            // Define o esquema de autentica√ß√£o
             a.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             a.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(a =>
         {
             a.RequireHttpsMetadata = true;
             a.SaveToken = true;
-            // Configura os par‚metros de validaÁ„o do token
+            // Configura os par√¢metros de valida√ß√£o do token
             a.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true, //Valida a chave de assinatura do token
                 IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key), //Define a chave de assinatura
-                ValidateIssuer = false, //N„o valida o emissor do token
-                ValidateAudience = false //N„o valida o destinat·rio do token
+                ValidateIssuer = false, //N√£o valida o emissor do token
+                ValidateAudience = false //N√£o valida o destinat√°rio do token
             };
         });
 
@@ -59,18 +59,18 @@ internal class Program
             });
         });
 
-        // ConfiguraÁ„o do Rate Limiter Anti-BruteForce
+        // Configura√ß√£o do Rate Limiter Anti-BruteForce
         builder.Services.AddRateLimiter(options =>
         {
             // Quando bloquear, devolve status 429 (Too Many Requests)
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-            // Cria uma polÌtica chamada "login-limit"
+            // Cria uma pol√≠tica chamada "login-limit"
             options.AddFixedWindowLimiter(policyName: "login-limit", options =>
             {
                 options.PermitLimit = 5; // Permite apenas 5 tentativas
                 options.Window = TimeSpan.FromMinutes(3); // A cada 3 minutos
-                options.QueueLimit = 0; // N„o deixa ninguÈm na fila de espera, rejeita na hora
+                options.QueueLimit = 0; // N√£o deixa ningu√©m na fila de espera, rejeita na hora
                 options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             });
         });
@@ -78,12 +78,12 @@ internal class Program
 
         builder.Services.AddSwaggerGen(c =>
         {
-            //Descobre o nome do arquivo XML que contÈm os coment·rios
+            //Descobre o nome do arquivo XML que cont√©m os coment√°rios
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            //Monta o caminho completo atÈ esse XML (normalmente na pasta bin/Debug/netX.X/)
+            //Monta o caminho completo at√© esse XML (normalmente na pasta bin/Debug/netX.X/)
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
-            //Informa ao Swagger que deve carregar os coment·rios desse arquivo XML
+            //Informa ao Swagger que deve carregar os coment√°rios desse arquivo XML
             c.IncludeXmlComments(xmlPath);
 
             c.SwaggerDoc("v1", new OpenApiInfo
@@ -152,10 +152,10 @@ internal class Program
         else
         {
         //    app.UseExceptionHandler("/error"); 
-            app.UseHsts(); // FOR«A USAR HTTPS
+            app.UseHsts(); // FOR√áA USAR HTTPS
         }
 
-        //Adiciona o middleware de tratamento de exceÁıes
+        //Adiciona o middleware de tratamento de exce√ß√µes
         app.UseMiddleware<BackofficeExceptionHandlerMiddleware>();
 
         using (var scope = app.Services.CreateScope())
@@ -169,14 +169,14 @@ internal class Program
                 // 1. Aplica as tabelas (Migrations)
                 context.Database.Migrate();
 
-                // 2. CriaÁ„o do admin
+                // 2. Cria√ß√£o do admin
                 await DbSeeder.SeedAdminUser(context, configuartion);
                 
             }
             catch(Exception ex)
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "Ocorreu um erro na criaÁ„o da inst‚ncia do banco de dados");
+                logger.LogError(ex, "Ocorreu um erro na cria√ß√£o da inst√¢ncia do banco de dados");
             }
         }
 
