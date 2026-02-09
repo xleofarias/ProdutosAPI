@@ -36,7 +36,7 @@ namespace ProdutosAPI.Data
                     // Garante que é UTC
                     v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
                     // Garante que o C# entenda como UTC
-                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
         }
     }
 }
