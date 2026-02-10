@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace ProdutosAPI.Middlewares
 {
@@ -29,7 +29,7 @@ namespace ProdutosAPI.Middlewares
                     code = HttpStatusCode.InternalServerError;
                     break;
             }
-            return (code, JsonConvert.SerializeObject(ex.Message));
+            return (code, JsonSerializer.Serialize(ex.Message));
         }
     }
 }
