@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
-using ProdutosAPI.Models;
 using ProdutosAPI.Services.Interfaces;
-using ProdutosAPI.Datas;
-using ProdutosAPI.Data;
 
 
 namespace ProdutosAPI.Controllers

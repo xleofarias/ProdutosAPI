@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using ProdutosAPI.Models;
+﻿using ProdutosAPI.Models;
 using ProdutosAPI.Services;
 
 namespace ProdutosAPI.Data

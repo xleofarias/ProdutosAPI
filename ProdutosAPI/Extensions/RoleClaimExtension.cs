@@ -1,5 +1,4 @@
-﻿using Microsoft.Identity.Client;
-using ProdutosAPI.Models;
+﻿using ProdutosAPI.Models;
 using System.Security.Claims;
 
 namespace ProdutosAPI.Extensions

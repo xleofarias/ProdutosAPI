@@ -1,5 +1,4 @@
 ﻿using ProdutosAPI.DTOs;
-using ProdutosAPI.Models;
 
 namespace ProdutosAPI.Services.Interfaces
 {
