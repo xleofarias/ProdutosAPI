@@ -1,19 +1,28 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.DTOs;
+using ProdutosAPI.Migrations;
 using ProdutosAPI.Models;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
+using System.Text.Json;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ProdutosAPI.Services
 {
     // Implementação do serviço de produtos
     public class ProductService : IProductService
     {
-        public readonly IProductRepository _productRepository;
-        public ProductService(IProductRepository productRepository)
+        private readonly IProductRepository _productRepository;
+        private readonly IDistributedCache _cache;
+
+        private const string cacheKey = "List_Products";
+
+        public ProductService(IProductRepository productRepository, IDistributedCache cache)
         {
             _productRepository = productRepository;
+            _cache = cache;
         }
 
         // Busca um produto por um critério específico
@@ -29,10 +38,45 @@ namespace ProdutosAPI.Services
         // Busca todos os produtos
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
+
+            try
+            {
+                //Tenta buscar o json do produtos
+                string? productsJson = await _cache.GetStringAsync(cacheKey);
+
+                if (!string.IsNullOrEmpty(productsJson))
+                {
+                    var productCache = JsonSerializer.Deserialize<IEnumerable<Product>>(productsJson);
+
+                    return productCache;
+                }
+            }catch(Exception ex)
+            {
+                Console.WriteLine($"Redis fora do ar: {ex}");
+            }
+
             var produtos = await _productRepository.GetAllAsync();
 
-            if (!produtos.Any()) throw new Exception("Nenhum produto encontrado");
+            if (!produtos.Any()) return Enumerable.Empty<Product>();
 
+            try
+            {
+
+                var options = new DistributedCacheEntryOptions
+                {
+                    // Expira em 2 minutos (TTL - Time To Live)
+                    // Depois disso, o Redis apaga sozinho e obriga a buscar no banco de novo.
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                };
+
+                string jsonForSave = JsonSerializer.Serialize<IEnumerable<Product>>(produtos);
+                await _cache.SetStringAsync(cacheKey, jsonForSave, options);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            
             return produtos;
         }
 
@@ -57,6 +101,9 @@ namespace ProdutosAPI.Services
             try 
             {
                 await _productRepository.CreateAsync(newProduct);
+
+                // Para limpa a lista assim no próximo get irá preencher com o nome produto
+                await _cache.RemoveAsync(cacheKey);
             }
             catch (DbUpdateException ex)
             {
@@ -80,6 +127,8 @@ namespace ProdutosAPI.Services
             try 
             {
                 await _productRepository.UpdateAsync(id, produtoAtualizar);
+
+                await _cache.RemoveAsync(cacheKey);
             }
             catch(DbUpdateException ex)
             {
@@ -99,6 +148,8 @@ namespace ProdutosAPI.Services
             try
             {
                 await _productRepository.DeleteAsync(id);
+
+                await _cache.RemoveAsync(cacheKey);
             }
             catch (DbUpdateException ex)
             {

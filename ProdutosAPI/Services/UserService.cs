@@ -4,15 +4,20 @@ using ProdutosAPI.Models;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace ProdutosAPI.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        public UserService(IUserRepository userRepository)
+        private readonly IDistributedCache _cache;
+        public UserService(IUserRepository userRepository, IDistributedCache cache)
         {
             _userRepository = userRepository;
+            _cache = cache;
         }
         public async Task<UserResponseDto> CreateAsync(UserRequestDto user)
         {
