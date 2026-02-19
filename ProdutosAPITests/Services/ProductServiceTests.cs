@@ -4,122 +4,121 @@ using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.DTOs;
 using System.Linq.Expressions;
 using ProdutosAPI.Services;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 
 namespace ProdutosAPITests.Services
 {
     public class ProductServiceTests
     {
+        private readonly Mock<IProductRepository> _mockRepo;
+        private readonly Mock<IDistributedCache> _mockCache;
+        private readonly ProductService _service;
+
+        public ProductServiceTests()
+        {
+            _mockRepo = new Mock<IProductRepository>();
+            _mockCache = new Mock<IDistributedCache>();
+            _service = new ProductService(_mockRepo.Object, _mockCache.Object);
+        }
+        
         [Fact]
         public async Task GetByIdAsync_ShouldReturnDto_WhenProductExists() 
         {
             // Arrange - Preparação
-            var mockRepo = new Mock<IProductRepository>();
             var product = new Product {Id = 1, Name = "Nescau", Price = 3.0m, Quantity = 1};
 
-            //Simula que foi no bancno e retornou o produto
-            mockRepo.Setup(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()))
-                .ReturnsAsync(product);
+            // Serializa para Byte[] (como o Redis guarda de verdade)
+            var json = JsonSerializer.Serialize(product);
+            var bytes = Encoding.UTF8.GetBytes(json);
 
-            var service = new ProductService(mockRepo.Object);
+            //Simula que foi no bancno e retornou o produto
+            _mockCache.Setup(r => r.GetAsync(
+                "List_Product",
+                It.IsAny<CancellationToken>()))
+                .ReturnsAsync(bytes);
 
             //Act - Ação
-            var produto = await service.GetByFindAsync(p => p.Id == 1);
+            var produto = await _service.GetByFindAsync(p => p.Id == 1);
 
             //Assert - Verificação
             Assert.NotNull(produto);
 
             // Confirmar se o método foi chamado
-            mockRepo.Verify(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()), Times.Once);
+            _mockRepo.Verify(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()), Times.Once);
         }
 
         [Fact]
         public async Task GetByIdAsync_ShouldThrowException_WhenProductDoesNotExist() 
         {
-            // Arrange - Preparação
-            var mockRepo = new Mock<IProductRepository>();
-
             //Configurar o simulado
-            mockRepo.Setup(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>())).ReturnsAsync((Product?)null);
-
-            // Obtém o objeto simulado
-            var service = new ProductService(mockRepo.Object);
+            _mockRepo.Setup(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>())).ReturnsAsync((Product?)null);
 
             //Act - Ação & Assert - Verificação
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => service.GetByFindAsync(p => p.Id == 99));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.GetByFindAsync(p => p.Id == 99));
 
             // Confirmar se o método foi chamado
-            mockRepo.Verify(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()), Times.Once);
+            _mockRepo.Verify(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()), Times.Once);
         }
 
         [Fact]
-        public async Task GetProdutos_DeveRetornarListaDeProdutos_QuandoExistir() 
+        public async Task GetAllAsync_ShouldReturnFromCache_WhenCacheExists()
         {
-            // Arrange - Preparação
-            var mockRepo = new Mock<IProductRepository>();
-
             //Configurar o que dever se simulado
-            mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Product> 
-            {
-                new Product {Id = 1, Name = "Nescau", Price = 2.0m, Quantity =1},
-                new Product {Id = 2, Name = "Arroz", Price = 2.5m, Quantity= 2}
-            });
+            var productsFake = new List<Product> {
+                new Product { Id = 1, Name = "Nescau", Price = 2.0m, Quantity = 1 },
+                new Product { Id = 2, Name = "Arroz", Price = 2.5m, Quantity = 2 }
+            };
 
-            // Obtém o objeto simulado
-            var service = new ProductService(mockRepo.Object);
+            // Serializa para Byte[] (como o Redis guarda de verdade)
+            var json = JsonSerializer.Serialize(productsFake);
+            var bytes = Encoding.UTF8.GetBytes(json);
 
-            //Act - Ação
-            var produtos = await service.GetAllAsync();
+            _mockCache.Setup(c => c.GetAsync(
+                    "List_Products",
+                    It.IsAny<CancellationToken>())).ReturnsAsync(bytes);
 
-            //Assert - Verificação
-            Assert.NotNull(produtos);
+            var result = await _service.GetAllAsync();
 
-            Assert.True(produtos.Any());
+            //Assert
+            Assert.NotNull(result);
+            Assert.Equal("Nescau", result.First().Name);
 
-            // Confirmar se o método foi chamado
-            mockRepo.Verify(r => r.GetAllAsync(), Times.Once);
+            _mockRepo.Verify(r => r.GetAllAsync(), Times.Never);
         }
 
         [Fact]
         public async Task GetProdutos_DeveLancarExcessao_QuandoNaoExistir() 
         {
-            // Arrange - Preparação
-            var mockRepo = new Mock<IProductRepository>();
-
-            mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Product>());
-
-            // Obtém o objeto simulado
-            var service = new ProductService(mockRepo.Object);
-
+            _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Product>());
 
             //Act - Ação & Assert - Verificação
-            await Assert.ThrowsAsync<Exception>(() => service.GetAllAsync());
+            await Assert.ThrowsAsync<Exception>(() => _service.GetAllAsync());
 
             // Confirmar se o método foi chamado
-            mockRepo.Verify(r => r.GetAllAsync(), Times.Once);
+            _mockRepo.Verify(r => r.GetAllAsync(), Times.Once);
         }
 
         [Fact]
         public async Task CreateAsync_ShouldReturnDto_WhenProductIsValid()
         {
-            //Arrange - Preparação
-            var mockRepo = new Mock<IProductRepository>();
-
             //Configurar o que dever se simulado
-            mockRepo.Setup(r => r.CreateAsync(It.IsAny<Product>()))
+            _mockRepo.Setup(r => r.CreateAsync(It.IsAny<Product>()))
                 .ReturnsAsync(new Product { Id = 1, Name = "Nescau", Quantity= 10, Price= 5.50m });
-        
-            var service = new ProductService(mockRepo.Object);
+
             var requestDto = new ProductDTO { Name = "Nescau", Quantity = 10, Price = 5.50m };
 
             //Act - Ação
-            var produto = await service.CreateAsync(requestDto);
+            var produto = await _service.CreateAsync(requestDto);
 
             // Assert - Verificação
             Assert.NotNull(produto);
             Assert.Equal("Nescau", produto.Name);
 
             // Confirmar se o método foi chamado
-            mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>()), Times.Once);
+            _mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>()), Times.Once);
         }
 
         //[Fact]
@@ -144,23 +143,20 @@ namespace ProdutosAPITests.Services
         public async Task CreateAsync_ShouldThrowException_WhenNameAlreadyExists() 
         {
             // Arrange - Preparação
-
-            var mockRepo = new Mock<IProductRepository>();
             var productExisting  = new Product{ Name = "Nescau", Price = 4.0m, Quantity =2};
 
-            mockRepo.Setup(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>())).ReturnsAsync(productExisting);
+            _mockRepo.Setup(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>())).ReturnsAsync(productExisting);
 
-            var service = new ProductService(mockRepo.Object);
             var requestDTO = new ProductDTO { Name = "Nescau", Price = 5.0m, Quantity =3};
             
             //Act - Ação
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(requestDTO));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(requestDTO));
 
             Assert.Equal("Já existe um produto com esse nome cadastrado", ex.Message);
 
-            mockRepo.Verify(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()), Times.Once);
+            _mockRepo.Verify(r => r.GetByFindAsync(It.IsAny<Expression<Func<Product, bool>>>()), Times.Once);
 
-            mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>()), Times.Never);
+            _mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>()), Times.Never);
         }
     }
 }
