@@ -4,9 +4,7 @@ using ProdutosAPI.Models;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
 
 namespace ProdutosAPI.Services
 {

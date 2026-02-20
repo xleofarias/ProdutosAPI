@@ -4,17 +4,28 @@ using ProdutosAPI.Models;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ProdutosAPITests.Services
 {
     public class UserServiceTests
     {
+        private readonly Mock<IUserRepository> _mockRepo;
+        private readonly Mock<IDistributedCache> _mockCache;
+        private readonly UserService _service;
+
+        public UserServiceTests()
+        {
+            _mockRepo = new Mock<IUserRepository>();
+            _mockCache = new Mock<IDistributedCache>();
+
+            _service = new UserService(_mockRepo.Object, _mockCache.Object);
+        }
+
         [Fact]
         public async Task GetById_DeveRetornaUsuario_QuandoExiste()
         {
             //Arrange - Preparação
-            var mockRepo = new Mock<IUserRepository>();
-
             var userEntity = new User
             {
                 Id = 1,
@@ -25,14 +36,11 @@ namespace ProdutosAPITests.Services
             };
 
             // Configura o comportamento simulado
-            mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
+            _mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
                 .ReturnsAsync(userEntity);
 
-            // Instanciamos o SERVICE REAL injetando o mock do repositório
-            var service = new UserService(mockRepo.Object);
-
             // ACT - Ação
-            var result = await service.GetAsync(p => p.Id == 1);
+            var result = await _service.GetAsync(p => p.Id == 1);
 
             //Assert - Verificação
             Assert.NotNull(result);
@@ -41,34 +49,27 @@ namespace ProdutosAPITests.Services
             Assert.Equal("Teste", result.Name);
 
             // Confirmar a chamada do método
-            mockRepo.Verify(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()), Times.Once());
+            _mockRepo.Verify(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()), Times.Once());
         }
 
         [Fact]
         public async Task GetUsuariosById_DeveLancarExcecao_QuandoNaoExiste() 
         {
-            //Arrange - Preparação
-            var mockRepo = new Mock<IUserRepository>();
-
             // Configura o comportamento simulado
-            mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
+            _mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
                 .ReturnsAsync((User?)null);
 
-            // Obtém o objeto simulado
-            var service = new UserService(mockRepo.Object);
-
             //Act - Ação & Assert - Verificação
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => service.GetAsync(p => p.Id == 99));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.GetAsync(p => p.Id == 99));
 
             // Confirmar a chamada do método
-            mockRepo.Verify(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()), Times.Once());
+            _mockRepo.Verify(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()), Times.Once());
         }
 
         [Fact]
         public async Task PatchChangeUserRole_DeveRetornarTrue_QuandoSucesso() 
         {
             //Arrange - Preparação
-            var mockRepo = new Mock<IUserRepository>();
             var userEntity = new User
             {
                 Id = 1,
@@ -79,50 +80,40 @@ namespace ProdutosAPITests.Services
                 Role = new Role { Id = 1, Nome ="Admin"}
             };
 
-            mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
+            _mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
                 .ReturnsAsync(userEntity);
 
             // Configura o comportamento simulado
-            mockRepo.Setup(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(true);
-
-            // Obtém o objeto simulado
-            var service = new UserService(mockRepo.Object);
+            _mockRepo.Setup(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(true);
 
             //Act - Ação
-            var resultado = await service.UpdateRoleAsync(1, 2);
+            var resultado = await _service.UpdateRoleAsync(1, 2);
 
             //Assert - Verificação
             Assert.True(resultado);
 
             // Confirmar a chamada do método
-            mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once());
+            _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once());
         }
 
         [Fact]
         public async Task PatchChangeUserRole_DeveLancarExcecao_QuandoUsuarioNaoExiste() 
         {
-            //Arrange - Preparação
-            var mockRepo = new Mock<IUserRepository>();
-
             // Configura o comportamento simulado
-            mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
+            _mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
                 .ReturnsAsync((User?)null);
             
-            // Obtém o objeto simulado
-            var service = new UserService(mockRepo.Object);
-
             ///Act - Ação & Assert - Verificação
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => service.UpdateRoleAsync(99, 2));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.UpdateRoleAsync(99, 2));
 
             // Confirmar a chamada do método
-            mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never());
+            _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never());
         }
 
         [Fact]
         public async Task PostRegistrar_DeveRetornaUsuario_QuandoSucesso() 
         {
             //Arrange - Preparação
-            var mockRepo = new Mock<IUserRepository>();
             var requestDto = new UserRequestDto
             {
                 Name = "Teste",
@@ -133,11 +124,11 @@ namespace ProdutosAPITests.Services
             };
 
             // Simula que o usuário não existe
-            mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
+            _mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()))
                 .ReturnsAsync((User?)null);
 
             // Configura o comportamento simulado
-            mockRepo.Setup(r => r.CreateAsync(It.IsAny<User>())).ReturnsAsync(new User
+            _mockRepo.Setup(r => r.CreateAsync(It.IsAny<User>())).ReturnsAsync(new User
             {
                 Id = 1,
                 Name = "Teste",
@@ -145,20 +136,17 @@ namespace ProdutosAPITests.Services
                 Login = "User"
             });
 
-            // Obtém o objeto simulado
-            var service = new UserService(mockRepo.Object);
-
             //Act - Ação
-            var usuarioNovo = await service.CreateAsync(requestDto);
+            var usuarioNovo = await _service.CreateAsync(requestDto);
 
             //Assert - Verificação
             Assert.Equal("Teste", usuarioNovo.Name);
 
             //  Confirmar a chamada do método
-            mockRepo.Verify(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()), Times.Once());
+            _mockRepo.Verify(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>()), Times.Once());
 
             // Confirmar a chamada do método
-            mockRepo.Verify(r => r.CreateAsync(It.IsAny<User>()), Times.Once());
+            _mockRepo.Verify(r => r.CreateAsync(It.IsAny<User>()), Times.Once());
         }
     }
 }
