@@ -139,6 +139,15 @@ internal class Program
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
 
+        // Add Redis for IDistributedCache
+        var redisConnection = Environment.GetEnvironmentVariable("RedisConnectionString") ?? builder.Configuration.GetConnectionString("Redis");
+        builder.Services.AddStackExchangeRedisCache(o =>
+        {
+            o.Configuration = Environment.GetEnvironmentVariable(redisConnection);
+
+            o.InstanceName = "ProdutosAPI";
+        });
+
         var app = builder.Build();
 
         app.UseSwagger();

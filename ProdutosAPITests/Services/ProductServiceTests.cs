@@ -36,7 +36,7 @@ namespace ProdutosAPITests.Services
 
             //Simula que foi no bancno e retornou o produto
             _mockCache.Setup(r => r.GetAsync(
-                "List_Product",
+                "List_Products",
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bytes);
 

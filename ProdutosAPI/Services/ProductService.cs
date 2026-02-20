@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.DTOs;
-using ProdutosAPI.Migrations;
 using ProdutosAPI.Models;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
 using System.Text.Json;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace ProdutosAPI.Services
