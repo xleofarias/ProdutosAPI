@@ -39,6 +39,9 @@ internal class Program
                 retainedFileCountLimit: 7,
                 shared: true
             ).CreateLogger();
+        
+        // Isso força o ASP.NET a mandar TUDO pro Serilog.
+        builder.Host.UseSerilog();
 
         try
         {
@@ -164,9 +167,9 @@ internal class Program
             var redisConnection = Environment.GetEnvironmentVariable("RedisConnectionString") ?? builder.Configuration.GetConnectionString("Redis");
             builder.Services.AddStackExchangeRedisCache(o =>
             {
-                o.Configuration = Environment.GetEnvironmentVariable(redisConnection);
+                o.Configuration = redisConnection;
 
-                o.InstanceName = "ProdutosAPI";
+                o.InstanceName = "ProdutosAPI:";
             });
 
             var app = builder.Build();
@@ -229,6 +232,10 @@ internal class Program
         catch(Exception ex)
         {
             Log.Fatal(ex, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
         }
     }
 }
