@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace ProdutosAPITests.Services
 {
@@ -15,12 +16,14 @@ namespace ProdutosAPITests.Services
     {
         private readonly Mock<IProductRepository> _mockRepo;
         private readonly Mock<IDistributedCache> _mockCache;
+        private readonly Mock<ILogger<ProductService>>_logger;
         private readonly ProductService _service;
 
         public ProductServiceTests()
         {
             _mockRepo = new Mock<IProductRepository>();
             _mockCache = new Mock<IDistributedCache>();
+            _logger = new Mock<ILogger<ProductService>>();
             _service = new ProductService(_mockRepo.Object, _mockCache.Object);
         }
         
