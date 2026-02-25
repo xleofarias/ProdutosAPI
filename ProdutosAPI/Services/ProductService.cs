@@ -97,18 +97,9 @@ namespace ProdutosAPI.Services
 
             if (newProduct is null) throw new ArgumentNullException("O produto não pode ser nulo");
 
-
-            try 
-            {
-                await _productRepository.CreateAsync(newProduct);
-
-                // Para limpa a lista assim no próximo get irá preencher com o nome produto
-                await _cache.RemoveAsync(cacheKey);
-            }
-            catch (DbUpdateException ex)
-            {
-                throw new Exception("Erro ao salvar o produto: " + ex.Message);
-            }
+            await _productRepository.CreateAsync(newProduct);
+            // Para limpa a lista assim no próximo get irá preencher com o nome produto
+            await _cache.RemoveAsync(cacheKey);
             
             return newProduct;
         }
