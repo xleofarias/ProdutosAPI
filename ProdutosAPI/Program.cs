@@ -9,11 +9,8 @@ using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services;
 using ProdutosAPI.Services.Interfaces;
 using Serilog;
-using Serilog.Sinks.File;
-using Serilog.Sinks.SystemConsole;
 using System.Reflection;
 using System.Threading.RateLimiting;
-using static System.Net.Mime.MediaTypeNames;
 
 internal class Program
 {
@@ -39,13 +36,13 @@ internal class Program
                 retainedFileCountLimit: 7,
                 shared: true
             ).CreateLogger();
+        //Force Serilog
+        builder.Host.UseSerilog();
 
         try
         {
-            Log.Information("Application starting up...");
-
+            Log.Information("Iniciando aplicação...");
             // Add Authentication
-            Log.Information("Creating Authentication...");
             var key = System.Text.Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
             builder.Services.AddAuthentication(a =>
             {
@@ -67,7 +64,6 @@ internal class Program
             });
 
             // Add Cors
-            Log.Information("Creating Cors...");
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
@@ -80,7 +76,6 @@ internal class Program
             });
 
             // Configuração do Rate Limiter Anti-BruteForce
-            Log.Information("Configuration Rate Limiter");
             builder.Services.AddRateLimiter(options =>
             {
                 // Quando bloquear, devolve status 429 (Too Many Requests)
@@ -164,9 +159,9 @@ internal class Program
             var redisConnection = Environment.GetEnvironmentVariable("RedisConnectionString") ?? builder.Configuration.GetConnectionString("Redis");
             builder.Services.AddStackExchangeRedisCache(o =>
             {
-                o.Configuration = Environment.GetEnvironmentVariable(redisConnection);
+                o.Configuration = redisConnection;
 
-                o.InstanceName = "ProdutosAPI";
+                o.InstanceName = "ProdutosAPI:";
             });
 
             var app = builder.Build();
@@ -229,6 +224,10 @@ internal class Program
         catch(Exception ex)
         {
             Log.Fatal(ex, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
         }
     }
 }

@@ -14,13 +14,15 @@ namespace ProdutosAPI.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IDistributedCache _cache;
+        private readonly ILogger<ProductService> _logger;
 
         private const string cacheKey = "List_Products";
 
-        public ProductService(IProductRepository productRepository, IDistributedCache cache)
+        public ProductService(IProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger)
         {
             _productRepository = productRepository;
             _cache = cache;
+            _logger = logger;
         }
 
         // Busca um produto por um critério específico
@@ -50,7 +52,7 @@ namespace ProdutosAPI.Services
                 }
             }catch(Exception ex)
             {
-                Console.WriteLine($"Redis fora do ar: {ex}");
+               _logger.LogWarning(ex, "Redis fora do ar!");
             }
 
             var produtos = await _productRepository.GetAllAsync();
@@ -72,7 +74,7 @@ namespace ProdutosAPI.Services
             }
             catch (Exception ex)
             {
-
+                _logger.LogWarning(ex, "Não foi possível realizar o cache dos produtos");
             }
             
             return produtos;
@@ -121,17 +123,9 @@ namespace ProdutosAPI.Services
             produtoAtualizar.Name = produto.Name;
             produtoAtualizar.Price = produto.Price;
             produtoAtualizar.Quantity = produto.Quantity;
-
-            try 
-            {
-                await _productRepository.UpdateAsync(id, produtoAtualizar);
-
-                await _cache.RemoveAsync(cacheKey);
-            }
-            catch(DbUpdateException ex)
-            {
-                throw new Exception("Erro ao tentar atualizar o produto: " + ex.Message);
-            }
+            
+            await _productRepository.UpdateAsync(id, produtoAtualizar);
+            await _cache.RemoveAsync(cacheKey);
 
             return true;
         }
@@ -143,17 +137,9 @@ namespace ProdutosAPI.Services
 
             if (produtoDeletar is null) throw new KeyNotFoundException("Produto não encontrado");
 
-            try
-            {
-                await _productRepository.DeleteAsync(id);
-
-                await _cache.RemoveAsync(cacheKey);
-            }
-            catch (DbUpdateException ex)
-            {
-                throw new Exception("Erro ao tentar deletar o produto" + ex.Message);
-            }
-
+            await _productRepository.DeleteAsync(id);
+            await _cache.RemoveAsync(cacheKey);
+           
             return true;
         }
     }
