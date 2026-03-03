@@ -5,26 +5,18 @@ namespace ProdutosAPI.Middlewares
     /// <summary>
     /// Middleware para manipular as exceções.
     /// </summary>
-    public abstract class AbstractExceptionHandlerMiddleware
+    public abstract class AbstractExceptionHandlerMiddleware(RequestDelegate next)
     {
-        // Próximo middleware na cadeia
-        private readonly RequestDelegate _next;
 
         // Método abstrato para obter o código de status e a mensagem de resposta
         public abstract (HttpStatusCode code, string message) GetResponse(Exception ex);
-
-        // Construtor
-        public AbstractExceptionHandlerMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
 
         // Método InvokeAsync
         public async Task InvokeAsync(HttpContext context)
         {
             try
             {
-                await _next(context);
+                await next(context);
             }
             catch (Exception ex)
             {
