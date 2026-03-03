@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Services.Interfaces;
 
-
 namespace ProdutosAPI.Controllers
 {
     [Authorize]

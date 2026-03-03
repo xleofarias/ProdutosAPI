@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 
 namespace ProdutosAPI.Middlewares
 {

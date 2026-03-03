@@ -30,12 +30,7 @@ internal class Program
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            .WriteTo.File(
-                path: "Logs/log-.txt",
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 7,
-                shared: true
-            ).CreateLogger();
+            .CreateLogger();
         //Force Serilog
         builder.Host.UseSerilog();
 
@@ -138,9 +133,10 @@ internal class Program
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 10,
                         maxRetryDelay: TimeSpan.FromSeconds(5),
-                        errorCodesToAdd: null//,
-                                             //errorNumbersToAdd: null
-                        )));
+                        errorCodesToAdd: null
+                    )
+                )
+            );
 
 
             //Add HealthCheck

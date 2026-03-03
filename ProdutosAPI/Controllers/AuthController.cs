@@ -15,7 +15,14 @@ namespace ProdutosAPI.Controllers
         {
             _authService = auth;
         }
-
+        
+        /// <summary>
+        /// Authenticates a user and returns a login response containing a token.
+        /// </summary>
+        /// <response code="200">Ok</response>
+        /// <response code="500">Error Internal Server</response>
+        /// <param name="login">The login request data including user credentials.</param>
+        /// <returns>An action result containing the login response.</returns>
         [AllowAnonymous]
         [HttpPost]
         [EnableRateLimiting(policyName:"login-limit")]
