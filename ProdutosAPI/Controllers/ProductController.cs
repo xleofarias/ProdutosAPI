@@ -22,6 +22,7 @@ namespace ProdutosAPI.Controllers
         /// <remarks>GET api/produtos</remarks>
         /// <param name="id">Código do Produto</param>
         /// <response code="200">Produto retornardo com sucesso</response>
+        /// <response code="401">Não Autorizado</response>
         /// <response code="404">Produto não encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Dados do produto com base no código passado: <paramref name="id"/></returns>
@@ -36,6 +37,7 @@ namespace ProdutosAPI.Controllers
         ///<summary>Buscar todos os produtos</summary>
         ///<remarks>GET api/produtos</remarks>
         /// <response code="200">Todos os produtos retonardos</response>
+        /// <response code="401">Não Autorizado</response>
         /// <response code="404">Nenhum produto foi encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Dados de todos os produtos cadastrados</returns>
@@ -50,6 +52,7 @@ namespace ProdutosAPI.Controllers
         ///<summary>Cadastrar um novo produto</summary>
         ///<remarks>POST api/produtos</remarks>
         /// <response code="201">Produto cadastrado</response>
+        /// <response code="401">Não Autorizado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Retorna os dados produto cadastrado</returns>
         [HttpPost]
@@ -66,6 +69,7 @@ namespace ProdutosAPI.Controllers
         /// <param name="id">Código do Produto</param>
         /// <response code="204">Produto atualizado</response>
         /// <response code="404">Produto não encontrado</response>
+        /// <response code="401">Não Autorizado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Produto atualizado com sucesso</returns>
         [HttpPut("{id:int}")]
@@ -80,6 +84,7 @@ namespace ProdutosAPI.Controllers
         /// <remarks>DELETE api/produtos</remarks>
         /// <param name="id">Código do Produto</param>
         /// <response code="204">Produto deletado</response>
+        /// <response code="401">Não Autorizado</response>
         /// <response code="404">Produto não encontrado</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Produto deletado com sucesso</returns>
