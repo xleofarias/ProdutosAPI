@@ -9,8 +9,10 @@ using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services;
 using ProdutosAPI.Services.Interfaces;
 using Serilog;
+using Serilog.Formatting.Compact;
 using System.Reflection;
 using System.Threading.RateLimiting;
+using MassTransit;
 
 internal class Program
 {
@@ -29,7 +31,7 @@ internal class Program
         //Add Serilog
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo.Console()
+            .WriteTo.Console(new CompactJsonFormatter())
             .CreateLogger();
         //Force Serilog
         builder.Host.UseSerilog();
@@ -158,6 +160,17 @@ internal class Program
                 o.Configuration = redisConnection;
 
                 o.InstanceName = "ProdutosAPI:";
+            });
+
+
+            var rabbitConnection = Environment.GetEnvironmentVariable("RabbitConnectionString") ?? builder.Configuration.GetConnectionString("Rabbit");
+            // Add RabbitMQ
+            builder.Services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(rabbitConnection);
+                });
             });
 
             var app = builder.Build();

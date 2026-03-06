@@ -6,6 +6,7 @@ using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
+using MassTransit;
 
 namespace ProdutosAPI.Services
 {
@@ -15,14 +16,16 @@ namespace ProdutosAPI.Services
         private readonly IProductRepository _productRepository;
         private readonly IDistributedCache _cache;
         private readonly ILogger<ProductService> _logger;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         private const string cacheKey = "List_Products";
 
-        public ProductService(IProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger)
+        public ProductService(IProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger, IPublishEndpoint publishEndpoint)
         {
             _productRepository = productRepository;
             _cache = cache;
             _logger = logger;
+            _publishEndpoint = publishEndpoint;
         }
 
         // Busca um produto por um critério específico
