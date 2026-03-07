@@ -26,6 +26,7 @@ namespace ProdutosAPITests.Services
         {
             _mockRepo = new Mock<IProductRepository>();
             _mockCache = new Mock<IDistributedCache>();
+            _mockRabbit = new Mock<IPublishEndpoint>();
             _logger = new Mock<ILogger<ProductService>>();
             _service = new ProductService(_mockRepo.Object, _mockCache.Object, _logger.Object, _mockRabbit.Object);
         }
