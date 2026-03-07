@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using MassTransit;
 
 namespace ProdutosAPITests.Services
 {
@@ -16,6 +17,7 @@ namespace ProdutosAPITests.Services
     {
         private readonly Mock<IProductRepository> _mockRepo;
         private readonly Mock<IDistributedCache> _mockCache;
+        private readonly Mock<IPublishEndpoint> _mockRabbit;
         private readonly Mock<ILogger<ProductService>>_logger;
         private readonly ProductService _service;
 
@@ -24,7 +26,7 @@ namespace ProdutosAPITests.Services
             _mockRepo = new Mock<IProductRepository>();
             _mockCache = new Mock<IDistributedCache>();
             _logger = new Mock<ILogger<ProductService>>();
-            _service = new ProductService(_mockRepo.Object, _mockCache.Object, _logger.Object);
+            _service = new ProductService(_mockRepo.Object, _mockCache.Object, _logger.Object, _mockRabbit.Object);
         }
         
         [Fact]
