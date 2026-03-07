@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using MassTransit;
+using ProdutosAPI.Extensions;
 
 namespace ProdutosAPI.Services
 {
@@ -103,7 +104,11 @@ namespace ProdutosAPI.Services
             await _productRepository.CreateAsync(newProduct);
             // Para limpa a lista assim no próximo get irá preencher com o nome produto
             await _cache.RemoveAsync(cacheKey);
-            
+
+            var evento = new ProductCreatedEvent(newProduct.Id, newProduct.Name, DateTime.UtcNow);
+
+            await _publishEndpoint.Publish(evento);
+
             return newProduct;
         }
 
@@ -121,6 +126,10 @@ namespace ProdutosAPI.Services
             await _productRepository.UpdateAsync(id, produtoAtualizar);
             await _cache.RemoveAsync(cacheKey);
 
+            var evento = new ProductCreatedEvent(produtoAtualizar.Id, produtoAtualizar.Name, DateTime.UtcNow);
+
+            await _publishEndpoint.Publish(evento);
+
             return true;
         }
 
@@ -133,6 +142,10 @@ namespace ProdutosAPI.Services
 
             await _productRepository.DeleteAsync(id);
             await _cache.RemoveAsync(cacheKey);
+
+            var evento = new ProductCreatedEvent(produtoDeletar.Id, produtoDeletar.Name, DateTime.UtcNow);
+
+            await _publishEndpoint.Publish(evento);
            
             return true;
         }
