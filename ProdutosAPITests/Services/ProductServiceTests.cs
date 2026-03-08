@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using MassTransit;
-using ProdutosAPI.Extensions;
+using ProdutosAPI.Events;
 
 namespace ProdutosAPITests.Services
 {

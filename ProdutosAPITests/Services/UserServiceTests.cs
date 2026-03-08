@@ -6,8 +6,8 @@ using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using ProdutosAPI.Extensions;
 using MassTransit;
+using ProdutosAPI.Events;
 
 namespace ProdutosAPITests.Services
 {
