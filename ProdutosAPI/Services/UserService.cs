@@ -5,6 +5,8 @@ using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Caching.Distributed;
+using MassTransit;
+using ProdutosAPI.Extensions;
 
 namespace ProdutosAPI.Services
 {
@@ -12,10 +14,14 @@ namespace ProdutosAPI.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IDistributedCache _cache;
-        public UserService(IUserRepository userRepository, IDistributedCache cache)
+        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly ILogger<User> _logger;
+        public UserService(IUserRepository userRepository, IDistributedCache cache, IPublishEndpoint publishEndpoint, ILogger<User> logger)
         {
             _userRepository = userRepository;
             _cache = cache;
+            _publishEndpoint = publishEndpoint;
+            _logger = logger;
         }
         public async Task<UserResponseDto> CreateAsync(UserRequestDto user)
         {
@@ -25,10 +31,10 @@ namespace ProdutosAPI.Services
             {
                 // Melhoria: Feedback específico
                 if (existingUser.Email == user.Email)
-                    throw new Exception("Email already registered.");
+                    throw new ConflictException("Email already registered.");
 
                 if (existingUser.Login == user.Login)
-                    throw new Exception("Login already registered.");
+                    throw new ConflictException("Login already registered.");
             }
 
             var userNew = new User
@@ -46,10 +52,14 @@ namespace ProdutosAPI.Services
             try
             {
                 await _userRepository.CreateAsync(userNew);
+
+                var evento = new UserCreatedEvent(userNew.Id, userNew.Name, DateTime.UtcNow);
+
+                await _publishEndpoint.Publish(evento);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error registering user: {ex.Message}");
+                _logger.LogWarning($"Error registering user: {ex.Message}");
             }
 
             return new UserResponseDto(userNew.Id, userNew.Name, userNew.Email, roleName);
@@ -76,7 +86,11 @@ namespace ProdutosAPI.Services
             if(user == null)
                 throw new KeyNotFoundException("Usuário não encontrado");
 
-            return await _userRepository.UpdateRoleAsync(userId, newRoleId);
+            var updateUser = await _userRepository.UpdateRoleAsync(userId, newRoleId);
+
+            var evento = new UserCreatedEvent(user.Id, user.Name, DateTime.UtcNow);
+
+            return updateUser;
         }
     }
 }

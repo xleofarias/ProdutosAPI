@@ -41,6 +41,7 @@ namespace ProdutosAPI.Controllers
         /// </summary>
         /// <response code="201">Usuário cadastrado com sucesso</response>
         /// <response code="401">Não Autorizado</response>
+        /// <response code="409">Conflito dados já encontrado no sistema</response>
         /// <response code="500">Erro interno na aplicação</response>
         /// <returns>Retorna os dados do usuário cadastrado</returns>
         [AllowAnonymous]

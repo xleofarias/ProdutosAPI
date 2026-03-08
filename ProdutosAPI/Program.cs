@@ -140,7 +140,6 @@ internal class Program
                 )
             );
 
-
             //Add HealthCheck
             builder.Services.AddHealthChecks();
 
@@ -161,7 +160,6 @@ internal class Program
 
                 o.InstanceName = "ProdutosAPI:";
             });
-
 
             var rabbitConnection = Environment.GetEnvironmentVariable("RabbitConnectionString") ?? builder.Configuration.GetConnectionString("Rabbit");
             // Add RabbitMQ

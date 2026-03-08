@@ -42,7 +42,6 @@ namespace ProdutosAPI.Services
         // Busca todos os produtos
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-
             try
             {
                 //Tenta buscar o json do produtos

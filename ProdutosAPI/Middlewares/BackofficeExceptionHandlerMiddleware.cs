@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using ProdutosAPI.Extensions;
 
 namespace ProdutosAPI.Middlewares
 {
@@ -29,6 +30,10 @@ namespace ProdutosAPI.Middlewares
                      or ArgumentNullException:
                     code = HttpStatusCode.BadRequest;
                     _logger.LogWarning(ex.Message, "Requisição inválida ou erro de regra de negócio. Status {StatusCode}", code);
+                    break;
+                case ConflictException:
+                    code = HttpStatusCode.Conflict;
+                    _logger.LogWarning(ex.Message, "Conflito. Status {StatusCode}", code);
                     break;
                 default:
                     code = HttpStatusCode.InternalServerError;
