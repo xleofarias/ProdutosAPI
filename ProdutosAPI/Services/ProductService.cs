@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using MassTransit;
-using ProdutosAPI.Extensions;
+using ProdutosAPI.Events;
 
 namespace ProdutosAPI.Services
 {

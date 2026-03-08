@@ -6,7 +6,7 @@ using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Caching.Distributed;
 using MassTransit;
-using ProdutosAPI.Extensions;
+using ProdutosAPI.Events;
 
 namespace ProdutosAPI.Services
 {
