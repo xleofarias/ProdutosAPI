@@ -102,7 +102,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once());
 
-            _mockPublish.Verify(p => p.Publish(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Once);
+            _mockPublish.Verify(p => p.Publish(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
