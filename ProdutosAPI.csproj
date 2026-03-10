@@ -37,4 +37,8 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Produtos.Contracts\Contracts.csproj" />
+  </ItemGroup>
+
 </Project>

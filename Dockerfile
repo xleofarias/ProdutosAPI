@@ -4,8 +4,8 @@ WORKDIR /src
 
 # Copia apenas arquivos necessários para cache
 COPY *.sln .
-COPY ProdutosAPI/ProdutosAPI.csproj ./ProdutosAPI/
-RUN dotnet restore ./ProdutosAPI/ProdutosAPI.csproj 
+COPY ./ProdutosAPI.csproj ./ProdutosAPI/
+RUN dotnet restore ./ProdutosAPI.csproj 
 
 # Copia tudo pro container
 COPY . .
