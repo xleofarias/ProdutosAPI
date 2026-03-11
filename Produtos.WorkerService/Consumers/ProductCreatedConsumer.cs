@@ -24,7 +24,6 @@ namespace WorkerService.Consumers
 
             _logger.LogInformation("Nova mensagem recebida do RabbitMQ!");
             _logger.LogInformation("Iniciando processamento do Produto: {Nome} (ID: {Id})", produto.Name, produto.ProductId);
-            Console.WriteLine("Olha to aqui");
             // Simula um trabalho pesado e demorado de 3 segundos
             // A API lá no Render nem faz ideia que isso está acontecendo agora
             await Task.Delay(3000);

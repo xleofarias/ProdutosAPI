@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace Contracts.Events
 {
-    public record class ProductCreatedEvent(int ProductId, string Name, DateTime CreatedAt);
+    public record class ProductCreatedEvent(int ProductId, string Name, decimal Price, DateTime CreatedAt);
 }

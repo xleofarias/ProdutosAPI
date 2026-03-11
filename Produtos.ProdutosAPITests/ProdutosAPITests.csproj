@@ -23,7 +23,6 @@
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <ProjectReference Include="..\Produtos.ProdutosAPI\ProdutosAPI.csproj" />
-	<ProjectReference Include="..\ProdutosAPI\ProdutosAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
