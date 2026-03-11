@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorkerService.Events
+namespace Contracts.Events
 {
-    public record ProductCreatedEvent(int ProductId, string Name, DateTime CreatedAt);
+    public record UserCreatedEvent(int UserId, string Name, DateTime CreatedAt);
 }
