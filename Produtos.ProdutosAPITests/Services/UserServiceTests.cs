@@ -7,7 +7,7 @@ using ProdutosAPI.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MassTransit;
-using ProdutosAPI.Events;
+using Contracts.Events;
 
 namespace ProdutosAPITests.Services
 {
