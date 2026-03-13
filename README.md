@@ -49,3 +49,19 @@ Para presenciar a mensageria em tempo real, você pode rodar apenas o Consumidor
    ```bash
    git clone [https://github.com/xleofarias/ProdutosAPI.git](https://github.com/xleofarias/ProdutosAPI.git)
    cd ProdutosAPI
+2. **Configure os Secrets no Worker:**
+   ```bash
+   dotnet user-secrets set "RabbitMq:Host" "amqps://sua-uri-do-cloudamqp" --project Produtos.Worker
+3. **Inicie o Consumidor:**
+   ```bash
+   dotnet run --project Produtos.Worker/Produtos.Worker.csproj
+4. Veja a mágica: Faça um POST no Swagger (Render) para criar um produto, e observe o terminal local do Worker consumindo o evento da nuvem em milissegundos!
+
+| Método | Endpoint | Descrição |
+| ---- | -------  | --------- |
+| POST | /v1/auth/login | Autenticação e geração de Token JWT |
+| GET  | /api/produtos  | Lista produtos com altíssima velocidade (Redis Cache) |
+| GET  | /api/produtos/{id} | Detalhes de um produto específico |
+| POST  | /api/produtos | Cadastro (Dispara evento assíncrono para o CloudAMQP) |
+| PUT  | /api/produtos/{id} | Atualização cadastral |
+| DELETE | /api/produtos/{id} | Remoção lógica/física |
