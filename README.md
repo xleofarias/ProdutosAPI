@@ -65,3 +65,17 @@ Para presenciar a mensageria em tempo real, você pode rodar apenas o Consumidor
 | POST  | /api/produtos | Cadastro (Dispara evento assíncrono para o CloudAMQP) |
 | PUT  | /api/produtos/{id} | Atualização cadastral |
 | DELETE | /api/produtos/{id} | Remoção lógica/física |
+
+
+🔮 Roadmap & Evolução
+[x] CRUD Completo e Autenticação JWT
+[x] Migração para PostgreSQL (Cloud)
+[x] Pipeline CI/CD (GitHub Actions -> Render)
+[x] Integração de Cache Distribuído (Redis)
+[x] Arquitetura Monorepo e Shared Contracts
+[x] Mensageria Assíncrona Cloud com RabbitMQ (Produtor/Consumidor)
+[ ] Paginação e Filtros Avançados
+[x] Implementação de Testes Unitários (xUnit)
+
+👨‍💻 Autor
+Desenvolvido por Leonardo Farias
