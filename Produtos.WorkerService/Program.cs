@@ -11,7 +11,7 @@ builder.Services.AddMassTransit(x =>
     var rabbitConnection = Environment.GetEnvironmentVariable("RabbitConnectionString") ?? builder.Configuration.GetConnectionString("Rabbit");
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("amqps://outzcudf:bN4vAkTsw5zzNFh5TUO-K3FrAaDrzRxj@jackal.rmq.cloudamqp.com/outzcudf");
+        cfg.Host(rabbitConnection);
 
         // 3. A MÁGICA: Essa linha manda o MassTransit criar a Fila (Queue) 
         // automaticamente lá no CloudAMQP e plugar no nosso Consumidor!
