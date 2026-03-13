@@ -69,12 +69,19 @@ Para presenciar a mensageria em tempo real, você pode rodar apenas o Consumidor
 
 🔮 Roadmap & Evolução
 [x] CRUD Completo e Autenticação JWT
+
 [x] Migração para PostgreSQL (Cloud)
+
 [x] Pipeline CI/CD (GitHub Actions -> Render)
+
 [x] Integração de Cache Distribuído (Redis)
+
 [x] Arquitetura Monorepo e Shared Contracts
+
 [x] Mensageria Assíncrona Cloud com RabbitMQ (Produtor/Consumidor)
+
 [ ] Paginação e Filtros Avançados
+
 [x] Implementação de Testes Unitários (xUnit)
 
 👨‍💻 Autor
