@@ -7,10 +7,10 @@ namespace ProdutosAPI.Services.Interfaces
     // Interface para o serviço de produtos
     public interface IProductService
     {
-       public  Task<Product> GetByFindAsync(Expression<Func<Product, bool>> predicate);
-       public  Task<IEnumerable<Product>> GetAllAsync();
-       public  Task<Product> CreateAsync(ProductDTO product);
-       public  Task<bool> UpdateAsync(int id, ProductDTO produto);
-       public  Task<bool> DeleteAsync(int id);
+       public  Task<Product> GetByFindAsync(Expression<Func<Product, bool>> predicate, CancellationToken cancellation = default);
+       public  Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellation = default);
+       public  Task<Product> CreateAsync(ProductDTO product, CancellationToken cancellation = default);
+       public  Task<bool> UpdateAsync(int id, ProductDTO produto, CancellationToken cancellation = default);
+       public  Task<bool> DeleteAsync(int id, CancellationToken cancellation = default);
     }
 }

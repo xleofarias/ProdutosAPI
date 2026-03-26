@@ -19,7 +19,7 @@ namespace ProdutosAPI.Services
         private readonly ILogger<ProductService> _logger;
         private readonly IPublishEndpoint _publishEndpoint;
 
-        private const string cacheKey = "List_Products";
+        private const string CacheKey = "List_Products";
 
         public ProductService(IProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger, IPublishEndpoint publishEndpoint)
         {
@@ -30,7 +30,7 @@ namespace ProdutosAPI.Services
         }
 
         // Busca um produto por um critério específico
-        public async Task<Product> GetByFindAsync(Expression<Func<Product, bool>> predicate)
+        public async Task<Product> GetByFindAsync(Expression<Func<Product, bool>> predicate, CancellationToken cancellation = default)
         {
             var produto = await _productRepository.GetByFindAsync(predicate);
 
@@ -40,12 +40,12 @@ namespace ProdutosAPI.Services
         }
 
         // Busca todos os produtos
-        public async Task<IEnumerable<Product>> GetAllAsync()
+        public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellation = default)
         {
             try
             {
                 //Tenta buscar o json do produtos
-                string? productsJson = await _cache.GetStringAsync(cacheKey);
+                string? productsJson = await _cache.GetStringAsync(CacheKey);
 
                 if (!string.IsNullOrEmpty(productsJson))
                 {
@@ -60,8 +60,6 @@ namespace ProdutosAPI.Services
 
             var produtos = await _productRepository.GetAllAsync();
 
-            if (!produtos.Any()) return Enumerable.Empty<Product>();
-
             try
             {
 
@@ -73,7 +71,7 @@ namespace ProdutosAPI.Services
                 };
 
                 string jsonForSave = JsonSerializer.Serialize<IEnumerable<Product>>(produtos);
-                await _cache.SetStringAsync(cacheKey, jsonForSave, options);
+                await _cache.SetStringAsync(CacheKey, jsonForSave, options);
             }
             catch (Exception ex)
             {
@@ -84,7 +82,7 @@ namespace ProdutosAPI.Services
         }
 
         // Adiciona um novo produto
-        public async Task<Product> CreateAsync(ProductDTO product)
+        public async Task<Product> CreateAsync(ProductDTO product, CancellationToken cancellation = default)
         {
             var productId = await _productRepository.GetByFindAsync(p => p.Name == product.Name);
 
@@ -98,54 +96,78 @@ namespace ProdutosAPI.Services
                 Quantity = product.Quantity,
             };
 
-            if (newProduct is null) throw new ArgumentNullException("O produto não pode ser nulo");
+            if (product is null) throw new ArgumentNullException("O produto não pode ser nulo");
+            if (string.IsNullOrWhiteSpace(product.Name)) throw new ArgumentException("Nome é obrigatório");
+            if (product.Price <= 0) throw new ArgumentException("O preço precisa ser maior que zero");
 
             await _productRepository.CreateAsync(newProduct);
             // Para limpa a lista assim no próximo get irá preencher com o nome produto
-            await _cache.RemoveAsync(cacheKey);
+            await _cache.RemoveAsync(CacheKey);
 
             var evento = new ProductCreatedEvent(newProduct.Id, newProduct.Name, newProduct.Price, DateTime.UtcNow);
 
-            await _publishEndpoint.Publish(evento);
+            try
+            {
+                await _publishEndpoint.Publish(evento);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falha ao publicar evento para produto {Id}", newProduct.Id);
+            }
 
             return newProduct;
         }
 
         // Atualiza um produto existente
-        public async Task<bool> UpdateAsync(int id,ProductDTO produto)
+        public async Task<bool> UpdateAsync(int id,ProductDTO produto, CancellationToken cancellation = default)
         {
             var produtoAtualizar = await _productRepository.GetByFindAsync(p => p.Id == id);
 
             if (produtoAtualizar is null) throw new KeyNotFoundException("Produto não encontrado");
+
+            if (produto is null) throw new ArgumentException("O produto não pode ser nulo");
 
             produtoAtualizar.Name = produto.Name;
             produtoAtualizar.Price = produto.Price;
             produtoAtualizar.Quantity = produto.Quantity;
             
             await _productRepository.UpdateAsync(id, produtoAtualizar);
-            await _cache.RemoveAsync(cacheKey);
+            await _cache.RemoveAsync(CacheKey);
 
             var evento = new ProductCreatedEvent(produtoAtualizar.Id, produtoAtualizar.Name, produtoAtualizar.Price, DateTime.UtcNow);
 
-            await _publishEndpoint.Publish(evento);
+            try
+            {
+                await _publishEndpoint.Publish(evento);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falha ao publicar evento para produto {Id}", produtoAtualizar.Id);
+            }
 
             return true;
         }
 
         // Deleta um produto por ID
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id, CancellationToken cancellation = default)
         {
             var produtoDeletar =  await _productRepository.GetByFindAsync(p => p.Id == id);
 
             if (produtoDeletar is null) throw new KeyNotFoundException("Produto não encontrado");
 
             await _productRepository.DeleteAsync(id);
-            await _cache.RemoveAsync(cacheKey);
+            await _cache.RemoveAsync(CacheKey);
 
             var evento = new ProductCreatedEvent(produtoDeletar.Id, produtoDeletar.Name, produtoDeletar.Price, DateTime.UtcNow);
 
-            await _publishEndpoint.Publish(evento);
-           
+            try
+            {
+                await _publishEndpoint.Publish(evento);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Falha ao publicar evento para produto {Id}", produtoDeletar.Id);
+            }
             return true;
         }
     }
