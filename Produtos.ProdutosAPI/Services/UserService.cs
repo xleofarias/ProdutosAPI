@@ -24,7 +24,7 @@ namespace ProdutosAPI.Services
             _publishEndpoint = publishEndpoint;
             _logger = logger;
         }
-        public async Task<UserResponseDto> CreateAsync(UserRequestDto user)
+        public async Task<UserResponseDto> CreateAsync(UserRequestDto user, CancellationToken ct = default)
         {
             var existingUser = await _userRepository.GetAsync(u => u.Email == user.Email || u.Login == user.Login);
 
@@ -66,7 +66,7 @@ namespace ProdutosAPI.Services
             return new UserResponseDto(userNew.Id, userNew.Name, userNew.Email, roleName);
         }
 
-        public async Task<UserResponseDto?> GetAsync(Expression<Func<User, bool>> predicate)
+        public async Task<UserResponseDto?> GetAsync(Expression<Func<User, bool>> predicate, CancellationToken ct = default)
         {
             var user = await _userRepository.GetAsync(predicate);
 
@@ -80,7 +80,7 @@ namespace ProdutosAPI.Services
             return new UserResponseDto(user.Id, user.Name, user.Email, user.Role.Nome);
         }
 
-        public async Task<bool> UpdateRoleAsync(int userId, int newRoleId)
+        public async Task<bool> UpdateRoleAsync(int userId, int newRoleId, CancellationToken ct = default)
         {
             var user = await _userRepository.GetAsync(u => u.Id == userId);
 

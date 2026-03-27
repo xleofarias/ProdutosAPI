@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProdutosAPI.DTOs;
+﻿using ProdutosAPI.DTOs;
 using ProdutosAPI.Models;
 using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;

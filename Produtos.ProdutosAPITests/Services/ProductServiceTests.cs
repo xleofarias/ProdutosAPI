@@ -98,18 +98,6 @@ namespace ProdutosAPITests.Services
             _mockRepo.Verify(r => r.GetAllAsync(), Times.Never);
         }
 
-        //[Fact]
-        //public async Task GetProdutos_DeveLancarExcessao_QuandoNaoExistir() 
-        //{
-        //    _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Product>());
-
-        //    //Act - Ação & Assert - Verificação
-        //    await Assert.ThrowsAsync<Exception>(() => _service.GetAllAsync());
-
-        //    // Confirmar se o método foi chamado
-        //    _mockRepo.Verify(r => r.GetAllAsync(), Times.Once);
-        //}
-
         [Fact]
         public async Task CreateAsync_ShouldReturnDto_WhenProductIsValid()
         {
@@ -155,25 +143,6 @@ namespace ProdutosAPITests.Services
 
             _mockRabbit.Verify(p => p.Publish(It.IsAny<ProductCreatedEvent>(),
                 It.IsAny<CancellationToken>()), Times.Never);
-
-            //[Fact]
-            //public async Task PostProdutos_DeveLancarExcessao_QuandoNaoCriar() 
-            //{
-            //    // Arrange - Preparação
-            //    var mockRepo = new Mock<IProductRepository>();
-
-            //    mockRepo.Setup(r => r.CreateAsync(It.IsAny<Product>())).ReturnsAsync((Product)null);
-
-            //    var service = new ProductService(mockRepo.Object);
-            //    var requestDto = new ProductDTO { Name = "Nescau", Quantity = 10, Price = 5.50m };
-
-            //    //Act - Ação & Assert - Verificação
-            //    //await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(requestDto));
-
-            //    // Confirmar se o método foi chamado
-            //    mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>()), Times.Once);
-            //}
-
         }
     }
 }
