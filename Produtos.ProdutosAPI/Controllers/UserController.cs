@@ -1,21 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
-using ProdutosAPI.Services.Interfaces;
+using ProdutosAPI.Services;
 
 namespace ProdutosAPI.Controllers
 {
     [Authorize]
    // [ApiController]
     [Route("api/users")]
-    public class UserController : ControllerBase
+    public class UserController(UserService usuarioService) : ControllerBase
     {
-        private readonly IUserService _usuarioService;
-
-        public UserController(IUserService usuarioService)
-        {
-            _usuarioService = usuarioService;
-        }
+        private readonly UserService _usuarioService = usuarioService;
 
         /// <summary>
         /// Buscar o usuário

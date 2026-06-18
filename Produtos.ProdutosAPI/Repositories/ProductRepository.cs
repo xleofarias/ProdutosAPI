@@ -1,52 +1,53 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Data;
 using ProdutosAPI.Models;
-using ProdutosAPI.Repositories.Interfaces;
 using System.Linq.Expressions;
 
 namespace ProdutosAPI.Repositories
 {
-    public class ProductRepository : IProductRepository
+    public class ProductRepository(AppDbContext dbContext)
     {
-        private readonly AppDbContext _dbContext;
+        private readonly AppDbContext _dbContext = dbContext;
 
-        public ProductRepository(AppDbContext dbContext)
+        public async Task<Product?> GetByFindAsync(Expression<Func<Product, bool>> predicate, CancellationToken ct = default)
         {
-            _dbContext = dbContext;
+            return await _dbContext.Products
+                .AsNoTracking()
+                .FirstOrDefaultAsync(predicate, ct);
         }
 
-        public async Task<Product> GetByFindAsync(Expression<Func<Product, bool>> predicate)
+        public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(predicate);
+            return await _dbContext.Products.AsNoTracking().ToListAsync(ct);
         }
-
-        public async Task<IEnumerable<Product>> GetAllAsync()
+        public async Task<Product> CreateAsync(Product product, CancellationToken ct = default)
         {
-            return await _dbContext.Products.AsNoTracking().ToListAsync();
-        }
-        public async Task<Product> CreateAsync(Product product)
-        {
-            await _dbContext.Products.AddAsync(product);
+            await _dbContext.Products.AddAsync(product, ct);
             await _dbContext.SaveChangesAsync();
             return product;
         }
-        public async Task<bool> UpdateAsync(int id, Product product)
+        public async Task<bool> UpdateAsync(int id, Product product, CancellationToken ct = default)
         {
-            // Usando ExecuteUpdateAsync para atualizar diretamente no banco de dadosS
-            return await _dbContext.Products
-                .Where(p => p.Id == id)
-                .ExecuteUpdateAsync(p => p
-                    .SetProperty(p => p.Name, product.Name)
-                    .SetProperty(p => p.Price, product.Price)
-                    .SetProperty(p => p.Quantity, product.Quantity)
-                ) > 0;
+            var productToUpdate = await _dbContext.Products.FindAsync(new object[] { id }, ct);
+
+            if(productToUpdate is null) return false;
+
+            productToUpdate.Name = product.Name;
+            productToUpdate.Price = product.Price;
+            productToUpdate.Quantity = product.Quantity;
+
+            await _dbContext.SaveChangesAsync(ct);
+            return true;
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
         {
-            // Usando ExecuteDeleteAsync para deletar diretamente no banco de dados
-            return await _dbContext.Products
-                .Where(p => p.Id == id)
-                .ExecuteDeleteAsync() > 0;
+            var existingProduct = await _dbContext.Products.FindAsync(new object[] { id }, ct);
+
+            if (existingProduct is null) return false;
+
+            _dbContext.Products.Remove(existingProduct);
+            await _dbContext.SaveChangesAsync(ct);
+            return true;
         }
     }
 }

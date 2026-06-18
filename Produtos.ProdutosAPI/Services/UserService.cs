@@ -1,23 +1,23 @@
 ﻿using ProdutosAPI.DTOs;
 using ProdutosAPI.Enums;
 using ProdutosAPI.Models;
-using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services.Interfaces;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Caching.Distributed;
 using MassTransit;
 using Contracts.Events;
 using ProdutosAPI.Extensions;
+using ProdutosAPI.Repositories;
 
 namespace ProdutosAPI.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly UserRepository _userRepository;
         private readonly IDistributedCache _cache;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger<User> _logger;
-        public UserService(IUserRepository userRepository, IDistributedCache cache, IPublishEndpoint publishEndpoint, ILogger<User> logger)
+        public UserService(UserRepository userRepository, IDistributedCache cache, IPublishEndpoint publishEndpoint, ILogger<User> logger)
         {
             _userRepository = userRepository;
             _cache = cache;

@@ -1,51 +1,47 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Data;
 using ProdutosAPI.Models;
-using ProdutosAPI.Repositories.Interfaces;
 using System.Linq.Expressions;
 
 namespace ProdutosAPI.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository(AppDbContext context)
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _context = context;
 
-        public UserRepository(AppDbContext context)
+        public async Task<User> CreateAsync(User user, CancellationToken ct = default)
         {
-            _context = context;
-        }
-
-        public async Task<User> CreateAsync(User user)
-        {
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            await _context.Users.AddAsync(user, ct);
+            await _context.SaveChangesAsync(ct);
 
             return user;
         }
 
-        public async Task<User?> GetAsync(Expression<Func<User, bool>> predicate)
+        public async Task<User?> GetAsync(Expression<Func<User, bool>> predicate, CancellationToken ct = default)
         {
             return await _context.Users
                 .Include(u => u.Role)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(predicate);
+                .FirstOrDefaultAsync(predicate, ct);
         }
 
-        public async Task<User?> GetByEmailWithRoleAsync(string email)
+        public async Task<User?> GetByEmailWithRoleAsync(string email, CancellationToken ct = default)
         {
             return await _context.Users
                 .Include(u => u.Role)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .FirstOrDefaultAsync(u => u.Email == email, ct);
         }
 
-        public async Task<bool> UpdateRoleAsync(int userId, int newRoleId)
+        public async Task<bool> UpdateRoleAsync(int userId, int newRoleId, CancellationToken ct = default)
         {
-            var rowAffectd = await _context.Users
-                .Where(u => u.Id == userId)
-                .ExecuteUpdateAsync(u => u.SetProperty(user => user.RoleId, newRoleId));
+            var user = await _context.Users.FindAsync(new object[] { userId }, ct);
 
-            return rowAffectd > 0;
+            if (user is null) return false;
+
+            user.RoleId = newRoleId;
+            await _context.SaveChangesAsync(ct);
+            return true;
         }
     }
 }

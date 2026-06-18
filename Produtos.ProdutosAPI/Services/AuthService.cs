@@ -1,25 +1,19 @@
 ﻿using ProdutosAPI.Models;
-using ProdutosAPI.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using ProdutosAPI.Extensions;
 using Microsoft.IdentityModel.Tokens;
-using ProdutosAPI.Repositories.Interfaces;
+using ProdutosAPI.Repositories;
 using ProdutosAPI.DTOs;
 
 namespace ProdutosAPI.Services
 {
     // Serviço de autenticação
-    public class AuthService : IAuthService
+    public class AuthService(UserRepository userRepository, IConfiguration configuration)
     {
-        private readonly IUserRepository _userRepository;
-        private readonly string _jwtKey;
+        private readonly UserRepository _userRepository = userRepository;
+        private readonly string _jwtKey = configuration["Jwt:Key"];
 
-        public AuthService(IUserRepository userRepository,IConfiguration configuration)
-        {
-            _userRepository = userRepository;
-            _jwtKey = configuration["Jwt:Key"];
-        }
         public async Task<LoginReponseDto> LoginAsync(LoginRequestDto login)
         {
             // Busca o usuário pelo email
@@ -30,17 +24,11 @@ namespace ProdutosAPI.Services
                 throw new Exception("Usuário não encontrado");
             };
 
-            //(DEBUG): O que DIABOS tem nesse banco?
-            Console.WriteLine($"[DEBUG] Hash vindo do banco: '{user.PasswordHash}'");
-            Console.WriteLine($"[DEBUG] Tamanho do Hash: {user.PasswordHash?.Length}");
-            Console.WriteLine($"[DEBUG] Senha digitada: '{login.Senha}'");
-
             // Verifica se a senha está correta
             if (!PasswordHelper.Verify(user.PasswordHash, login.Senha))
             {
                 throw new Exception("Senha inválida");
-            }
-            ;
+            };
 
             var token = GenerateToken(user);
 

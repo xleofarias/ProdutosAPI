@@ -1,22 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
-using ProdutosAPI.Services.Interfaces;
+using ProdutosAPI.Services;
 
 namespace ProdutosAPI.Controllers
 {
     [Authorize]
     [Route("api/products")]
     [ApiController]
-    public class ProductController : ControllerBase
+    public class ProductController(ProductService productsService) : ControllerBase
     {
-        private readonly IProductService _productsService;
-
-        // Injeção de dependência do serviço de produtos
-        public ProductController(IProductService products)
-        {
-            _productsService = products;
-        }
+        private readonly ProductService _productsService = productsService;
 
         /// <summary>Buscar Produto pelo Código</summary>
         /// <remarks>GET api/produtos</remarks>
@@ -95,6 +89,13 @@ namespace ProdutosAPI.Controllers
             await _productsService.DeleteAsync(id);
 
             return NoContent();
+        }
+
+        [HttpPost("seed")]
+        public async Task<IActionResult> SeedAsync()
+        {
+            await _productsService.SeedAsync();
+            return Ok();
         }
     }
 }

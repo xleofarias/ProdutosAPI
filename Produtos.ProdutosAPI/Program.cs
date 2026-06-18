@@ -5,19 +5,21 @@ using Microsoft.OpenApi.Models;
 using ProdutosAPI.Data;
 using ProdutosAPI.Middlewares;
 using ProdutosAPI.Repositories;
-using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services;
-using ProdutosAPI.Services.Interfaces;
 using Serilog;
 using Serilog.Formatting.Compact;
 using System.Reflection;
 using System.Threading.RateLimiting;
 using MassTransit;
+using DotNetEnv;
 
 internal class Program
 {
     private static async Task Main(string[] args)
     {
+        // Carrega as variáveis de ambiente do arquivo .env
+        DotNetEnv.Env.Load();
+
         //Incluído para tratar o problema de data por conta do postgresql
         //AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -40,7 +42,7 @@ internal class Program
         {
             Log.Information("Iniciando aplicação...");
             // Add Authentication
-            var key = System.Text.Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
+            var key = System.Text.Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY"));
             builder.Services.AddAuthentication(a =>
             {
                 // Define o esquema de autenticação
@@ -144,13 +146,13 @@ internal class Program
             builder.Services.AddHealthChecks();
 
             // Add Repositories
-            builder.Services.AddScoped<IProductRepository, ProductRepository>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<ProductRepository>();
+            builder.Services.AddScoped<UserRepository>();
 
             //Add Services
-            builder.Services.AddScoped<IProductService, ProductService>();
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ProductService>();
+            builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<AuthService>();
 
             // Add Redis for IDistributedCache
             var redisConnection = Environment.GetEnvironmentVariable("RedisConnectionString") ?? builder.Configuration.GetConnectionString("Redis");

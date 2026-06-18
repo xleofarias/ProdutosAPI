@@ -2,19 +2,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using ProdutosAPI.DTOs;
-using ProdutosAPI.Services.Interfaces;
+using ProdutosAPI.Services;
 
 namespace ProdutosAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(AuthService auth) : ControllerBase
     {
-        private readonly IAuthService _authService;
-        public AuthController(IAuthService auth)
-        {
-            _authService = auth;
-        }
+        private readonly AuthService _authService = auth;
         
         /// <summary>
         /// Authenticates a user and returns a login response containing a token.
