@@ -92,6 +92,7 @@ namespace ProdutosAPI.Controllers
         }
 
         [HttpPost("seed")]
+        [Authorize(Roles="Admin")]
         public async Task<IActionResult> SeedAsync()
         {
             await _productsService.SeedAsync();
