@@ -18,10 +18,7 @@ internal class Program
     private static async Task Main(string[] args)
     {
         // Carrega as variáveis de ambiente do arquivo .env
-        DotNetEnv.Env.Load();
-
-        //Incluído para tratar o problema de data por conta do postgresql
-        //AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        Env.Load("../.env");
 
         var builder = WebApplication.CreateBuilder(args);
 
@@ -31,18 +28,23 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
 
         //Add Serilog
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.Console(new CompactJsonFormatter())
-            .CreateLogger();
-        //Force Serilog
-        builder.Host.UseSerilog();
+        //Log.Logger = new LoggerConfiguration()
+        //    .MinimumLevel.Debug()
+        //    .WriteTo.Console(new CompactJsonFormatter())
+        //    .CreateLogger();
+        ////Force Serilog
+        //builder.Host.UseSerilog();
 
         try
         {
             Log.Information("Iniciando aplicação...");
             // Add Authentication
-            var key = System.Text.Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY"));
+            var jwtSecret = Environment.GetEnvironmentVariable("JWT_KEY");
+
+            if (string.IsNullOrWhiteSpace(jwtSecret) || System.Text.Encoding.UTF8.GetByteCount(jwtSecret) < 32) throw new InvalidOperationException("JWT_SECRET ausente ou curto demais: precisa de no mínimo 32 bytes para HS256.");
+
+            var key = System.Text.Encoding.UTF8.GetBytes(jwtSecret);
+
             builder.Services.AddAuthentication(a =>
             {
                 // Define o esquema de autenticação
@@ -133,11 +135,11 @@ internal class Program
 
             //Add DbContext
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("ProdutosAPI"),
+                options.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 10,
-                        maxRetryDelay: TimeSpan.FromSeconds(5),
-                        errorCodesToAdd: null
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(10),
+                        errorNumbersToAdd: null
                     )
                 )
             );
@@ -154,16 +156,18 @@ internal class Program
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AuthService>();
 
+            builder.Services.AddDistributedMemoryCache();
+
             // Add Redis for IDistributedCache
-            var redisConnection = Environment.GetEnvironmentVariable("RedisConnectionString") ?? builder.Configuration.GetConnectionString("Redis");
-            builder.Services.AddStackExchangeRedisCache(o =>
-            {
-                o.Configuration = redisConnection;
+            //var redisConnection = Environment.GetEnvironmentVariable("RedisConnectionString") ?? builder.Configuration.GetConnectionString("Redis");
+            //builder.Services.AddStackExchangeRedisCache(o =>
+            //{
+            //    o.Configuration = redisConnection;
+//
+            //    o.InstanceName = "ProdutosAPI:";
+            //});
 
-                o.InstanceName = "ProdutosAPI:";
-            });
-
-            var rabbitConnection = Environment.GetEnvironmentVariable("RabbitConnectionString") ?? builder.Configuration.GetConnectionString("Rabbit");
+            var rabbitConnection = Environment.GetEnvironmentVariable("RABBITMQ_URL") ?? builder.Configuration.GetConnectionString("Rabbit");
             // Add RabbitMQ
             builder.Services.AddMassTransit(x =>
             {
@@ -197,14 +201,14 @@ internal class Program
                 var services = scope.ServiceProvider;
                 try
                 {
-                    var context = services.GetRequiredService<AppDbContext>();
-                    var configuartion = services.GetRequiredService<IConfiguration>();
+                    //var context = services.GetRequiredService<AppDbContext>();
+                   // var configuartion = services.GetRequiredService<IConfiguration>();
 
                     // 1. Aplica as tabelas (Migrations)
-                    context.Database.Migrate();
+                    //context.Database.Migrate();
 
                     // 2. Criação do admin
-                    await DbSeeder.SeedAdminUser(context, configuartion);
+                    //await DbSeeder.SeedAdminUser(context, configuartion);
 
                 }
                 catch (Exception ex)
@@ -214,6 +218,7 @@ internal class Program
                 }
             }
 
+            
             app.UseHttpsRedirection();
 
             app.UseCors("AllowFrontend");

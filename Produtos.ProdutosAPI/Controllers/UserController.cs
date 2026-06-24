@@ -45,7 +45,7 @@ namespace ProdutosAPI.Controllers
         {
             var user = await _usuarioService.CreateAsync(usuario);
 
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = user.Id }, usuario);
+            return CreatedAtRoute(nameof(GetByIdAsync), new { id = user.Id }, user);
         }
 
 

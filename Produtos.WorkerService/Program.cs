@@ -1,6 +1,8 @@
-using WorkerService;
 using WorkerService.Consumers;
 using MassTransit;
+using DotNetEnv;
+
+Env.Load("../.env");
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -8,13 +10,13 @@ builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<ProductCreatedConsumer>();
 
-    var rabbitConnection = Environment.GetEnvironmentVariable("RabbitConnectionString") ?? builder.Configuration.GetConnectionString("Rabbit");
+    var rabbitConnection = Environment.GetEnvironmentVariable("RABBITMQ_URL") ?? builder.Configuration.GetConnectionString("Rabbit");
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(rabbitConnection);
 
-        // 3. A MÁGICA: Essa linha manda o MassTransit criar a Fila (Queue) 
-        // automaticamente lá no CloudAMQP e plugar no nosso Consumidor!
+        // 3. A Mï¿½GICA: Essa linha manda o MassTransit criar a Fila (Queue) 
+        // automaticamente lï¿½ no CloudAMQP e plugar no nosso Consumidor!
         cfg.ConfigureEndpoints(context);
     });
 });

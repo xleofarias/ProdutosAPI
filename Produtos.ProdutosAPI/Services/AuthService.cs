@@ -9,10 +9,9 @@ using ProdutosAPI.DTOs;
 namespace ProdutosAPI.Services
 {
     // Serviço de autenticação
-    public class AuthService(UserRepository userRepository, IConfiguration configuration)
+    public class AuthService(UserRepository userRepository)
     {
         private readonly UserRepository _userRepository = userRepository;
-        private readonly string _jwtKey = configuration["Jwt:Key"];
 
         public async Task<LoginReponseDto> LoginAsync(LoginRequestDto login)
         {
@@ -45,7 +44,7 @@ namespace ProdutosAPI.Services
             var tokenHandler = new JwtSecurityTokenHandler();
 
             //Chave secreta para assinatura do token
-            var key = Encoding.ASCII.GetBytes(_jwtKey);
+            var key = Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY") ?? throw new Exception("JWT_KEY não configurado no ambiente"));
 
             //Criação dos claims
             var claims = RoleClaimExtension.GetClaims(user);

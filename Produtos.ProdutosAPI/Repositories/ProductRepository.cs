@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Data;
+using ProdutosAPI.DTOs;
 using ProdutosAPI.Models;
 using System.Linq.Expressions;
 
@@ -25,6 +26,24 @@ namespace ProdutosAPI.Repositories
             await _dbContext.Products.AddAsync(product, ct);
             await _dbContext.SaveChangesAsync();
             return product;
+        }
+
+        public async Task<PagedResult<Product>> ProductPaginationDtoAsync(int pageNumber, int pageSize, CancellationToken ct = default)
+        {
+            var query = _dbContext.Products
+                .AsNoTracking()
+                .OrderBy(p => p.Id);
+
+            var totalItems = await query.CountAsync(ct);
+
+            var products = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(ct);
+
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            return new PagedResult<Product>(products, pageNumber, pageSize, totalItems, totalPages);
         }
         public async Task<bool> UpdateAsync(int id, Product product, CancellationToken ct = default)
         {

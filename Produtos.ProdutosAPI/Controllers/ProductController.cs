@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Services;
+using ProdutosAPI.Models;
 
 namespace ProdutosAPI.Controllers
 {
@@ -41,6 +42,14 @@ namespace ProdutosAPI.Controllers
         {
             var products = await _productsService.GetAllAsync();
             return Ok(products);
+        }
+
+        [HttpGet("pagination")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<PagedResult<Product>>> GetPaginationAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var pagedProducts = await _productsService.ProductPaginationDtoAsync(pageNumber, pageSize);
+            return Ok(pagedProducts);
         }
 
         ///<summary>Cadastrar um novo produto</summary>
@@ -93,9 +102,9 @@ namespace ProdutosAPI.Controllers
 
         [HttpPost("seed")]
         [Authorize(Roles="Admin")]
-        public async Task<IActionResult> SeedAsync()
+        public async Task<IActionResult> SeedAsync([FromQuery] int count = 50)
         {
-            await _productsService.SeedAsync();
+            await _productsService.SeedAsync(count);
             return Ok();
         }
     }

@@ -74,6 +74,11 @@ namespace ProdutosAPI.Services
             return produtos;
         }
 
+        public async Task<PagedResult<Product>> ProductPaginationDtoAsync(int pageNumber, int pageSize, CancellationToken ct = default)
+        {
+            return await _productRepository.ProductPaginationDtoAsync(pageNumber, pageSize, ct);
+        }
+
         // Adiciona um novo produto
         public async Task<Product> CreateAsync(ProductDTO product, CancellationToken ct = default)
         {
@@ -163,18 +168,18 @@ namespace ProdutosAPI.Services
             return true;
         }
 
-        public async Task SeedAsync()
+        public async Task SeedAsync(int count = 50, CancellationToken ct = default)
         {
             var faker = new Faker<Product>()
-                .RuleFor(p => p.Name, f => f.Name.FirstName())
+                .RuleFor(p => p.Name, f => f.Commerce.ProductName())
                 .RuleFor(p => p.Price, f => decimal.Parse(f.Finance.Amount(1, 1000).ToString("0.00")))
                 .RuleFor(p => p.Quantity, f => f.Random.Number(1, 100));
 
-            var products = faker.Generate(50);
+            var products = faker.Generate(count);
 
             foreach (var product in products)
             {
-                await _productRepository.CreateAsync(product);
+                await _productRepository.CreateAsync(product, ct);
             }
         } 
     }

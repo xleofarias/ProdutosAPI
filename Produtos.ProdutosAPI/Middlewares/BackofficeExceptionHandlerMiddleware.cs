@@ -23,23 +23,25 @@ namespace ProdutosAPI.Middlewares
                 case KeyNotFoundException
                      or FileNotFoundException:
                     code = HttpStatusCode.NotFound;
-                    _logger.LogWarning(ex.Message, "Recurso não encontrado. Status: {StatusCode}", code);
+                    _logger.LogWarning(ex, "Recurso não encontrado. Status: {StatusCode}", code);
                     break;
                 case ArgumentException
                      or DbUpdateException
                      or ArgumentNullException:
                     code = HttpStatusCode.BadRequest;
-                    _logger.LogWarning(ex.Message, "Requisição inválida ou erro de regra de negócio. Status {StatusCode}", code);
+                    _logger.LogWarning(ex, "Requisição inválida ou erro de regra de negócio. Status {StatusCode}", code);
                     break;
                 case ConflictException:
                     code = HttpStatusCode.Conflict;
-                    _logger.LogWarning(ex.Message, "Conflito. Status {StatusCode}", code);
+                    _logger.LogWarning(ex, "Conflito. Status {StatusCode}", code);
                     break;
                 default:
                     code = HttpStatusCode.InternalServerError;
-                    _logger.LogCritical(ex.Message, "Erro interno não tratado no servidor!");
+                    _logger.LogCritical(ex, "Erro interno não tratado no servidor!");
                     break;
             }
+
+            Console.WriteLine($"Exceção capturada: {ex.Message}");
             return (code, JsonSerializer.Serialize(ex.Message));
         }
     }

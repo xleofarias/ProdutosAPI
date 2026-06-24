@@ -30,9 +30,6 @@ namespace ProdutosAPI.Data
 
             builder.Property(x => x.Quantity)
                 .IsRequired();
-
-            builder.HasIndex(x => x.Name)
-                .IsUnique();
         }
     }
 }
