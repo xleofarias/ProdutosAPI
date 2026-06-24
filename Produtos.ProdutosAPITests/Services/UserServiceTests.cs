@@ -2,7 +2,7 @@ using Moq;
 using System.Linq.Expressions;
 using ProdutosAPI.Models;
 using ProdutosAPI.DTOs;
-using ProdutosAPI.Repositories;
+using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -14,7 +14,7 @@ namespace ProdutosAPITests.Services
 {
     public class UserServiceTests
     {
-        private readonly Mock<UserRepository> _mockRepo;
+        private readonly Mock<IUserRepository> _mockRepo;
         private readonly Mock<IDistributedCache> _mockCache;
         private readonly Mock<IPublishEndpoint> _mockPublish;
         private readonly Mock<ILogger<User>> _mockLogger;
@@ -22,7 +22,7 @@ namespace ProdutosAPITests.Services
 
         public UserServiceTests()
         {
-            _mockRepo = new Mock<UserRepository>();
+            _mockRepo = new Mock<IUserRepository>();
             _mockCache = new Mock<IDistributedCache>();
             _mockPublish = new Mock<IPublishEndpoint>();
             _mockLogger = new Mock<ILogger<User>>();

@@ -5,15 +5,15 @@ using Microsoft.Extensions.Caching.Distributed;
 using MassTransit;
 using Contracts.Events;
 using System.Linq.Expressions;
-using ProdutosAPI.Repositories;
+using ProdutosAPI.Repositories.Interfaces;
 using Bogus;
 
 namespace ProdutosAPI.Services
 {
     // Implementação do serviço de produtos
-    public class ProductService(ProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger, IPublishEndpoint publishEndpoint)
+    public class ProductService(IProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger, IPublishEndpoint publishEndpoint)
     {
-        private readonly ProductRepository _productRepository = productRepository;
+        private readonly IProductRepository _productRepository = productRepository;
         private readonly IDistributedCache _cache = cache;
         private readonly ILogger<ProductService> _logger = logger;
         private readonly IPublishEndpoint _publishEndpoint = publishEndpoint;

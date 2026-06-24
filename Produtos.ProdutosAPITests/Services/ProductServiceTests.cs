@@ -11,12 +11,12 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using MassTransit;
 using Contracts.Events;
-
+using ProdutosAPI.Repositories.Interfaces;
 namespace ProdutosAPITests.Services
 {
     public class ProductServiceTests
     {
-        private readonly Mock<ProductRepository> _mockRepo;
+        private readonly Mock<IProductRepository> _mockRepo;
         private readonly Mock<IDistributedCache> _mockCache;
         private readonly Mock<IPublishEndpoint> _mockRabbit;
         private readonly Mock<ILogger<ProductService>>_logger;
@@ -24,7 +24,7 @@ namespace ProdutosAPITests.Services
 
         public ProductServiceTests()
         {
-            _mockRepo = new Mock<ProductRepository>();
+            _mockRepo = new Mock<IProductRepository>();
             _mockCache = new Mock<IDistributedCache>();
             _mockRabbit = new Mock<IPublishEndpoint>();
             _logger = new Mock<ILogger<ProductService>>();

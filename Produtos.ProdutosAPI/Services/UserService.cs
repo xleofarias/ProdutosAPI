@@ -7,17 +7,17 @@ using Microsoft.Extensions.Caching.Distributed;
 using MassTransit;
 using Contracts.Events;
 using ProdutosAPI.Extensions;
-using ProdutosAPI.Repositories;
+using ProdutosAPI.Repositories.Interfaces;
 
 namespace ProdutosAPI.Services
 {
     public class UserService : IUserService
     {
-        private readonly UserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IDistributedCache _cache;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger<User> _logger;
-        public UserService(UserRepository userRepository, IDistributedCache cache, IPublishEndpoint publishEndpoint, ILogger<User> logger)
+        public UserService(IUserRepository userRepository, IDistributedCache cache, IPublishEndpoint publishEndpoint, ILogger<User> logger)
         {
             _userRepository = userRepository;
             _cache = cache;
