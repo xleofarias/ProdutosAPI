@@ -1,64 +1,85 @@
 name: .NET Core CI & Docker
 
+# QUANDO roda:
 on:
   push:
-    branches: [ "master"]
-    tags: 'v*' # Aciona quando criar tags como v1.0, v2.0.1, etc.
+    branches: [ "master" ]
+    tags: 'v*'            # também dispara em tags v1.0, v2.0.1, etc.
   pull_request:
-    branches: [ "master"]
+    branches: [ "master" ]
 
 jobs:
   build-and-test:
-    name: Build, Test e Docker
+    name: Build, Test e Deploy
     runs-on: ubuntu-latest
 
+    # Permissões necessárias pro login OIDC no Azure (passo 9).
+    permissions:
+      id-token: write   # exigido pro azure/login pedir o token OIDC
+      contents: read    # exigido pra clonar o repositório
+
     steps:
-    # 1. Baixa o código
+    # 1. Baixa o código do repositório pra dentro da máquina
     - uses: actions/checkout@v4
 
-    # 2. Configura o .NET no ambiente (Mude a versão se necessário)
+    # 2. Instala o SDK do .NET (versão alinhada ao projeto: .NET 10)
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 10.0.x # Altere para 6.0 ou 7.0 se for o seu caso
+        dotnet-version: 10.0.x
 
-    # 3. Baixa as dependências (Nuget packages)
+    # 3. Baixa as dependências (pacotes NuGet)
     - name: Restore dependencies
       run: dotnet restore
 
-    # 4. Compila o código (Verifica erros de sintaxe C#)
+    # 4. Compila em modo Release
     - name: Build
       run: dotnet build --no-restore --configuration Release
 
-    # 5. Roda os testes (Se você tiver testes unitários criados)
-    # Se não tiver testes ainda, esse passo vai passar "rápido" ou avisar que não achou testes
+    # 5. Roda os testes unitários
     - name: Test
       run: dotnet test --no-build --configuration Release --verbosity normal
 
-    # 6. O "Grand Finale" do CI: Garante que o Dockerfile funciona
+    # 6. Decide a tag da imagem: nome da tag do Git, ou 'latest' em push normal
     - name: Determinar a Tag da Imagem
       id: vars
       run: |
-        # Se for uma tag do Git, usa o nome da tag (ex: v1.0.0)
         if [[ $GITHUB_REF == refs/tags/* ]]; then
           echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         else
-          # Se for um push normal na main, usa 'latest'
           echo "tag=latest" >> $GITHUB_OUTPUT
         fi
-        # 1. Faz Login no Docker Hub usando os segredos
+
+    # 7. Loga no Docker Hub
     - name: Login no Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # 2. Build e Push
-    # Atenção: Adicionei o ${{ secrets.DOCKER_USERNAME }}/ antes do nome da imagem
+    # 8. Builda e publica a imagem no Docker Hub
     - name: Build e Push da Imagem
       run: |
         docker build -f ./Produtos.ProdutosAPI/Dockerfile . -t ${{ secrets.DOCKER_USERNAME }}/produtosapi:${{ steps.vars.outputs.tag }}
         docker push ${{ secrets.DOCKER_USERNAME }}/produtosapi:${{ steps.vars.outputs.tag }}
-    - name: Build Docker Image
-      # Repare no ${{ steps.vars.outputs.tag }} -> é a variável que criámos acima
-      run: docker build -f ./Produtos.ProdutosAPI/Dockerfile . -t produtosapi:${{ steps.vars.outputs.tag }}
+
+    # 9. Loga no Azure via OIDC (só fora de pull_request)
+    - name: Azure Login
+      if: github.event_name != 'pull_request'
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.CTPRODUTOSAPI_AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.CTPRODUTOSAPI_AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.CTPRODUTOSAPI_AZURE_SUBSCRIPTION_ID }}
+
+    # 10. Aponta o Container App pra imagem recém-publicada (só fora de pull_request)
+    - name: Deploy no Container App
+      if: github.event_name != 'pull_request'
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az containerapp update \
+            --name ct-produtosapi \
+            --resource-group rg-produtosapi \
+            --image ${{ secrets.DOCKER_USERNAME }}/produtosapi:${{ steps.vars.outputs.tag }}
