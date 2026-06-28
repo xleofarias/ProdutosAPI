@@ -8,6 +8,7 @@ namespace ProdutosAPI.Repositories.Interfaces
     {
         Task<User?> GetAsync(Expression<Func<User, bool>> predicate, CancellationToken ct = default);
         Task<User> CreateAsync(User user, CancellationToken ct = default);
+        Task<User?> GetByEmailWithRoleAsync(string email, CancellationToken ct = default);
         Task<bool> UpdateRoleAsync(int userId, int newRoleId, CancellationToken ct = default);
         
     }

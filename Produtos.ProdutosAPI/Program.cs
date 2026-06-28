@@ -6,8 +6,8 @@ using ProdutosAPI.Data;
 using ProdutosAPI.Middlewares;
 using ProdutosAPI.Repositories;
 using ProdutosAPI.Services;
+using ProdutosAPI.Repositories.Interfaces;
 using Serilog;
-using Serilog.Formatting.Compact;
 using System.Reflection;
 using System.Threading.RateLimiting;
 using MassTransit;
@@ -92,6 +92,8 @@ internal class Program
                 });
             });
 
+            
+
             // Add Swagger
             builder.Services.AddSwaggerGen(c =>
             {
@@ -144,12 +146,12 @@ internal class Program
                 )
             );
 
-            //Add HealthCheck
+            //Add HealthCheck   
             builder.Services.AddHealthChecks();
 
             // Add Repositories
-            builder.Services.AddScoped<ProductRepository>();
-            builder.Services.AddScoped<UserRepository>();
+            builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             //Add Services
             builder.Services.AddScoped<ProductService>();
@@ -163,7 +165,7 @@ internal class Program
             //builder.Services.AddStackExchangeRedisCache(o =>
             //{
             //    o.Configuration = redisConnection;
-//
+            //
             //    o.InstanceName = "ProdutosAPI:";
             //});
 
@@ -183,10 +185,10 @@ internal class Program
             app.UseSwaggerUI();
 
             // Configure the HTTP request pipeline.
-            //if (app.Environment.IsDevelopment())
-            //{
-            //    app.UseDeveloperExceptionPage();
-            //}
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
             //else
             //{
             //    //    app.UseExceptionHandler("/error"); 
@@ -237,6 +239,7 @@ internal class Program
         }
         catch(Exception ex)
         {
+            Console.WriteLine(ex.ToString()); 
             Log.Fatal(ex, "Application terminated unexpectedly");
         }
         finally

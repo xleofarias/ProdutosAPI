@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProdutosAPI.Data;
 using ProdutosAPI.Models;
+using ProdutosAPI.Repositories.Interfaces;
 using System.Linq.Expressions;
 
 namespace ProdutosAPI.Repositories
 {
-    public class UserRepository(AppDbContext context)
+    public class UserRepository(AppDbContext context) : IUserRepository
     {
         private readonly AppDbContext _context = context;
 

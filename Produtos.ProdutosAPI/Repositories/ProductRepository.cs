@@ -2,11 +2,12 @@
 using ProdutosAPI.Data;
 using ProdutosAPI.DTOs;
 using ProdutosAPI.Models;
+using ProdutosAPI.Repositories.Interfaces;
 using System.Linq.Expressions;
 
 namespace ProdutosAPI.Repositories
 {
-    public class ProductRepository(AppDbContext dbContext)
+    public class ProductRepository(AppDbContext dbContext) : IProductRepository
     {
         private readonly AppDbContext _dbContext = dbContext;
 

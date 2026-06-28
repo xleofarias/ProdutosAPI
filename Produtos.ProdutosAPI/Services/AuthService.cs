@@ -3,15 +3,15 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using ProdutosAPI.Extensions;
 using Microsoft.IdentityModel.Tokens;
-using ProdutosAPI.Repositories;
+using ProdutosAPI.Repositories.Interfaces;
 using ProdutosAPI.DTOs;
 
 namespace ProdutosAPI.Services
 {
     // Serviço de autenticação
-    public class AuthService(UserRepository userRepository)
+    public class AuthService(IUserRepository userRepository)
     {
-        private readonly UserRepository _userRepository = userRepository;
+        private readonly IUserRepository _userRepository = userRepository;
 
         public async Task<LoginReponseDto> LoginAsync(LoginRequestDto login)
         {
