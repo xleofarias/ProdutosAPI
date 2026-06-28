@@ -183,15 +183,15 @@ internal class Program
             app.UseSwaggerUI();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                //    app.UseExceptionHandler("/error"); 
-                app.UseHsts(); // FORÇA USAR HTTPS
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+            //else
+            //{
+            //    //    app.UseExceptionHandler("/error"); 
+            //    app.UseHsts(); // FORÇA USAR HTTPS
+            //}
 
             //Adiciona o middleware de tratamento de exceções
             app.UseMiddleware<BackofficeExceptionHandlerMiddleware>();
