@@ -15,9 +15,9 @@ namespace ProdutosAPI.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IDistributedCache _cache;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly ISendEndpointProvider _publishEndpoint;
         private readonly ILogger<User> _logger;
-        public UserService(IUserRepository userRepository, IDistributedCache cache, IPublishEndpoint publishEndpoint, ILogger<User> logger)
+        public UserService(IUserRepository userRepository, IDistributedCache cache, ISendEndpointProvider publishEndpoint, ILogger<User> logger)
         {
             _userRepository = userRepository;
             _cache = cache;
@@ -56,7 +56,9 @@ namespace ProdutosAPI.Services
 
                 var evento = new UserCreatedEvent(userNew.Id, userNew.Name, DateTime.UtcNow);
 
-                await _publishEndpoint.Publish(evento);
+                var endpoint = await _publishEndpoint.GetSendEndpoint(new Uri("queue:user-created"));
+                
+                await endpoint.Send(evento, ct);
             }
             catch (Exception ex)
             {

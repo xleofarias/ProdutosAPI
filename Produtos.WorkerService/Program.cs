@@ -10,16 +10,19 @@ builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<ProductCreatedConsumer>();
 
-    var rabbitConnection = Environment.GetEnvironmentVariable("RABBITMQ_URL") ?? builder.Configuration.GetConnectionString("Rabbit");
-    x.UsingRabbitMq((context, cfg) =>
+    x.UsingAzureServiceBus((context, cfg) =>
     {
-        cfg.Host(rabbitConnection);
+        cfg.Host(Environment.GetEnvironmentVariable("AZURE_BUS_URL"));
 
-        // 3. A M�GICA: Essa linha manda o MassTransit criar a Fila (Queue) 
-        // automaticamente l� no CloudAMQP e plugar no nosso Consumidor!
-        cfg.ConfigureEndpoints(context);
+        cfg.ReceiveEndpoint("product-created", endpoint =>
+        {
+            endpoint.ConfigureConsumeTopology = false;
+
+            endpoint.ConfigureConsumer<ProductCreatedConsumer>(context);
+        });
     });
 });
+
 
 var host = builder.Build();
 host.Run();

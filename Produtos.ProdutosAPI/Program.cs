@@ -169,13 +169,12 @@ internal class Program
             //    o.InstanceName = "ProdutosAPI:";
             //});
 
-            var rabbitConnection = Environment.GetEnvironmentVariable("RABBITMQ_URL") ?? builder.Configuration.GetConnectionString("Rabbit");
             // Add RabbitMQ
             builder.Services.AddMassTransit(x =>
             {
-                x.UsingRabbitMq((context, cfg) =>
+                x.UsingAzureServiceBus((context, cfg) =>
                 {
-                    cfg.Host(rabbitConnection);
+                    cfg.Host(Environment.GetEnvironmentVariable("AZURE_BUS_URL"));
                 });
             });
 

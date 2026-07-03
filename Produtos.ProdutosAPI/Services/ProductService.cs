@@ -11,12 +11,12 @@ using Bogus;
 namespace ProdutosAPI.Services
 {
     // Implementação do serviço de produtos
-    public class ProductService(IProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger, IPublishEndpoint publishEndpoint)
+    public class ProductService(IProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger, ISendEndpointProvider publishEndpoint)
     {
         private readonly IProductRepository _productRepository = productRepository;
         private readonly IDistributedCache _cache = cache;
         private readonly ILogger<ProductService> _logger = logger;
-        private readonly IPublishEndpoint _publishEndpoint = publishEndpoint;
+        private readonly ISendEndpointProvider _publishEndpoint = publishEndpoint;
 
         private const string CacheKey = "List_Products";
 
@@ -105,7 +105,8 @@ namespace ProdutosAPI.Services
 
             try
             {
-                await _publishEndpoint.Publish(evento);
+                var endpoint  = await _publishEndpoint.GetSendEndpoint(new Uri("queue:product-created"));
+                await endpoint.Send(evento, ct);
             }
             catch (Exception ex)
             {
@@ -135,7 +136,8 @@ namespace ProdutosAPI.Services
 
             try
             {
-                await _publishEndpoint.Publish(evento);
+                var endpoint  = await _publishEndpoint.GetSendEndpoint(new Uri("queue:product-created"));
+                await endpoint.Send(evento, ct);
             }
             catch (Exception ex)
             {
@@ -159,7 +161,8 @@ namespace ProdutosAPI.Services
 
             try
             {
-                await _publishEndpoint.Publish(evento);
+                var endpoint  = await _publishEndpoint.GetSendEndpoint(new Uri("queue:product-created"));
+                await endpoint.Send(evento, ct);
             }
             catch(Exception ex)
             {
