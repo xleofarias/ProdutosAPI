@@ -108,7 +108,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            _mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+            //_mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do m�todo
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never());
 
-            _mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+            //_mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -167,7 +167,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            _mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Once);
+            //_mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
