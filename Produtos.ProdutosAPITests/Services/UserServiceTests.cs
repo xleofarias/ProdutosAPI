@@ -16,7 +16,7 @@ namespace ProdutosAPITests.Services
     {
         private readonly Mock<IUserRepository> _mockRepo;
         private readonly Mock<IDistributedCache> _mockCache;
-        private readonly Mock<IPublishEndpoint> _mockPublish;
+        private readonly Mock<ISendEndpointProvider> _mockPublish;
         private readonly Mock<ILogger<User>> _mockLogger;
         private readonly UserService _service;
 
@@ -24,7 +24,7 @@ namespace ProdutosAPITests.Services
         {
             _mockRepo = new Mock<IUserRepository>();
             _mockCache = new Mock<IDistributedCache>();
-            _mockPublish = new Mock<IPublishEndpoint>();
+            _mockPublish = new Mock<ISendEndpointProvider>();
             _mockLogger = new Mock<ILogger<User>>();
 
             _service = new UserService(_mockRepo.Object, _mockCache.Object, _mockPublish.Object, _mockLogger.Object);
@@ -108,7 +108,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            _mockPublish.Verify(p => p.Publish(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do m�todo
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never());
 
-            _mockPublish.Verify(p => p.Publish(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -167,7 +167,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            _mockPublish.Verify(p => p.Publish(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Once);
+            _mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

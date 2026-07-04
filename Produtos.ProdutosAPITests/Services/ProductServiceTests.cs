@@ -1,24 +1,23 @@
 ﻿using Moq;
 using ProdutosAPI.Models;
-using ProdutosAPI.Repositories;
 using ProdutosAPI.DTOs;
 using System.Linq.Expressions;
 using ProdutosAPI.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using MassTransit;
 using Contracts.Events;
 using ProdutosAPI.Repositories.Interfaces;
+
 namespace ProdutosAPITests.Services
 {
     public class ProductServiceTests
     {
         private readonly Mock<IProductRepository> _mockRepo;
         private readonly Mock<IDistributedCache> _mockCache;
-        private readonly Mock<IPublishEndpoint> _mockRabbit;
+        private readonly Mock<ISendEndpointProvider> _mockRabbit;
         private readonly Mock<ILogger<ProductService>>_logger;
         private readonly ProductService _service;
 
@@ -26,7 +25,7 @@ namespace ProdutosAPITests.Services
         {
             _mockRepo = new Mock<IProductRepository>();
             _mockCache = new Mock<IDistributedCache>();
-            _mockRabbit = new Mock<IPublishEndpoint>();
+            _mockRabbit = new Mock<ISendEndpointProvider>();
             _logger = new Mock<ILogger<ProductService>>();
             _service = new ProductService(_mockRepo.Object, _mockCache.Object, _logger.Object, _mockRabbit.Object);
         }
@@ -117,7 +116,7 @@ namespace ProdutosAPITests.Services
             // Confirmar se o método foi chamado
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Once);
 
-            _mockRabbit.Verify(p => p.Publish(It.IsAny<ProductCreatedEvent>(),
+            _mockRabbit.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
                 It.IsAny<CancellationToken>()),
                 Times.Once);
         }
@@ -141,7 +140,7 @@ namespace ProdutosAPITests.Services
 
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Never);
 
-            _mockRabbit.Verify(p => p.Publish(It.IsAny<ProductCreatedEvent>(),
+            _mockRabbit.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
                 It.IsAny<CancellationToken>()), Times.Never);
         }
     }
