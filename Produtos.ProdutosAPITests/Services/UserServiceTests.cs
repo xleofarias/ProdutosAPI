@@ -16,7 +16,8 @@ namespace ProdutosAPITests.Services
     {
         private readonly Mock<IUserRepository> _mockRepo;
         private readonly Mock<IDistributedCache> _mockCache;
-        private readonly Mock<ISendEndpointProvider> _mockPublish;
+        private readonly Mock<ISendEndpoint> _mockSendEndpoint;
+        private readonly Mock<ISendEndpointProvider> _mockSendEndpointProvider;
         private readonly Mock<ILogger<User>> _mockLogger;
         private readonly UserService _service;
 
@@ -24,10 +25,12 @@ namespace ProdutosAPITests.Services
         {
             _mockRepo = new Mock<IUserRepository>();
             _mockCache = new Mock<IDistributedCache>();
-            _mockPublish = new Mock<ISendEndpointProvider>();
+            _mockSendEndpointProvider = new Mock<ISendEndpointProvider>();
             _mockLogger = new Mock<ILogger<User>>();
-
-            _service = new UserService(_mockRepo.Object, _mockCache.Object, _mockPublish.Object, _mockLogger.Object);
+            
+            _mockSendEndpointProvider.Setup(x => x.GetSendEndpoint(It.IsAny<Uri>()))
+                .ReturnsAsync(_mockSendEndpoint.Object);
+            _service = new UserService(_mockRepo.Object, _mockCache.Object, _mockSendEndpointProvider.Object, _mockLogger.Object);
         }
 
         [Fact]
@@ -108,7 +111,8 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            //_mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(),
+                It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -118,19 +122,19 @@ namespace ProdutosAPITests.Services
             _mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((User?)null);
             
-            ///Act - A��o & Assert - Verifica��o
+            ///Act - Ação & Assert - Verificação
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.UpdateRoleAsync(99, 2));
 
-            // Confirmar a chamada do m�todo
+            // Confirmar a chamada do método
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never());
 
-            //_mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
         public async Task PostRegistrar_DeveRetornaUsuario_QuandoSucesso() 
         {
-            //Arrange - Prepara��o
+            //Arrange - Preparação
             var requestDto = new UserRequestDto
             {
                 Name = "Teste",
@@ -140,7 +144,7 @@ namespace ProdutosAPITests.Services
                 RoleId = 1
             };
 
-            // Simula que o usu�rio n�o existe
+            // Simula que o usuário n�o existe
             _mockRepo.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>() ))
                 .ReturnsAsync((User?)null);
 
@@ -155,7 +159,7 @@ namespace ProdutosAPITests.Services
                 Slug = "teste"
             });
 
-            //Act - A��o
+            //Act - Ação
             var usuarioNovo = await _service.CreateAsync(requestDto);
 
             //Assert - Verificação
@@ -167,7 +171,8 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            //_mockPublish.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Once);
+            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

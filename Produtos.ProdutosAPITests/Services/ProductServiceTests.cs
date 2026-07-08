@@ -17,7 +17,8 @@ namespace ProdutosAPITests.Services
     {
         private readonly Mock<IProductRepository> _mockRepo;
         private readonly Mock<IDistributedCache> _mockCache;
-        private readonly Mock<ISendEndpointProvider> _mockRabbit;
+        private readonly Mock<ISendEndpoint> _mockSendEndpoint;
+        private readonly Mock<ISendEndpointProvider> _mockSendEndpointProvider;
         private readonly Mock<ILogger<ProductService>>_logger;
         private readonly ProductService _service;
 
@@ -25,9 +26,12 @@ namespace ProdutosAPITests.Services
         {
             _mockRepo = new Mock<IProductRepository>();
             _mockCache = new Mock<IDistributedCache>();
-            _mockRabbit = new Mock<ISendEndpointProvider>();
+            _mockSendEndpoint = new Mock<ISendEndpoint>();
+            _mockSendEndpointProvider = new Mock<ISendEndpointProvider>();
             _logger = new Mock<ILogger<ProductService>>();
-            _service = new ProductService(_mockRepo.Object, _mockCache.Object, _logger.Object, _mockRabbit.Object);
+            _mockSendEndpointProvider.Setup(x => x.GetSendEndpoint(It.IsAny<Uri>()))
+                .ReturnsAsync(_mockSendEndpoint.Object);
+            _service = new ProductService(_mockRepo.Object, _mockCache.Object, _logger.Object, _mockSendEndpointProvider.Object);
         }
         
         [Fact]
@@ -116,9 +120,8 @@ namespace ProdutosAPITests.Services
             // Confirmar se o método foi chamado
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Once);
 
-            //_mockRabbit.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
-             //   It.IsAny<CancellationToken>()),
-              //  Times.Once);
+            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
+               It.IsAny<CancellationToken>()),Times.Once);
         }
 
         [Fact]
@@ -140,8 +143,8 @@ namespace ProdutosAPITests.Services
 
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Never);
 
-            //_mockRabbit.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
-             //   It.IsAny<CancellationToken>()), Times.Never);
+            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
+               It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }
