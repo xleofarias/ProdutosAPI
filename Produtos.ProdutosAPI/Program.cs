@@ -169,7 +169,7 @@ internal class Program
             //    o.InstanceName = "ProdutosAPI:";
             //});
 
-            // Add RabbitMQ
+            // Add RabbitMQ 
             builder.Services.AddMassTransit(x =>
             {
                 x.UsingAzureServiceBus((context, cfg) =>
