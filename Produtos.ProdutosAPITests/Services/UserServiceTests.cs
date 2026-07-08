@@ -25,6 +25,7 @@ namespace ProdutosAPITests.Services
         {
             _mockRepo = new Mock<IUserRepository>();
             _mockCache = new Mock<IDistributedCache>();
+            _mockSendEndpoint = new Mock<ISendEndpoint>();
             _mockSendEndpointProvider = new Mock<ISendEndpointProvider>();
             _mockLogger = new Mock<ILogger<User>>();
             
@@ -111,7 +112,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(),
+            _mockSendEndpoint.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(),
                 It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -128,7 +129,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.UpdateRoleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never());
 
-            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockSendEndpoint.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -171,7 +172,7 @@ namespace ProdutosAPITests.Services
             // Confirmar a chamada do método
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(),
+            _mockSendEndpoint.Verify(p => p.Send(It.IsAny<UserCreatedEvent>(),
                 It.IsAny<CancellationToken>()), Times.Once);
         }
     }

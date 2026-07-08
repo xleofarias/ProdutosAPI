@@ -120,7 +120,7 @@ namespace ProdutosAPITests.Services
             // Confirmar se o método foi chamado
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Once);
 
-            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
+            _mockSendEndpoint.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
                It.IsAny<CancellationToken>()),Times.Once);
         }
 
@@ -143,7 +143,7 @@ namespace ProdutosAPITests.Services
 
             _mockRepo.Verify(r => r.CreateAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Never);
 
-            _mockSendEndpointProvider.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
+            _mockSendEndpoint.Verify(p => p.Send(It.IsAny<ProductCreatedEvent>(),
                It.IsAny<CancellationToken>()), Times.Never);
         }
     }
