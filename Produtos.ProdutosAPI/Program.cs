@@ -158,16 +158,16 @@ internal class Program
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AuthService>();
 
-            builder.Services.AddDistributedMemoryCache();
 
             // Add Redis for IDistributedCache
-            //var redisConnection = Environment.GetEnvironmentVariable("RedisConnectionString") ?? builder.Configuration.GetConnectionString("Redis");
-            //builder.Services.AddStackExchangeRedisCache(o =>
-            //{
-            //    o.Configuration = redisConnection;
-            //
-            //    o.InstanceName = "ProdutosAPI:";
-            //});
+            //builder.Services.AddDistributedMemoryCache();
+            var redisConnection = Environment.GetEnvironmentVariable("REDIS_URL");
+            builder.Services.AddStackExchangeRedisCache(o =>
+            {
+                o.Configuration = redisConnection;
+            
+                o.InstanceName = "ProdutosAPI:";
+            });
 
             // Add RabbitMQ 
             builder.Services.AddMassTransit(x =>
