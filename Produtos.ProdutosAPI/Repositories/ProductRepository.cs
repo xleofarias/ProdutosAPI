@@ -29,6 +29,12 @@ namespace ProdutosAPI.Repositories
             return product;
         }
 
+        public async Task CreateRangeAsync(IEnumerable<Product> products, CancellationToken ct = default)
+        {
+            await _dbContext.Products.AddRangeAsync(products, ct);
+            await _dbContext.SaveChangesAsync(ct);
+        }
+
         public async Task<PagedResult<Product>> ProductPaginationDtoAsync(int pageNumber, int pageSize, CancellationToken ct = default)
         {
             var query = _dbContext.Products
@@ -68,6 +74,24 @@ namespace ProdutosAPI.Repositories
             _dbContext.Products.Remove(existingProduct);
             await _dbContext.SaveChangesAsync(ct);
             return true;
+        }
+        
+        public async Task SeedAsync(int count = 50, CancellationToken ct = default)
+        {
+            var faker = new Bogus.Faker<Product>()
+                .RuleFor(p => p.Name, f => f.Commerce.ProductName())
+                .RuleFor(p => p.Price, f => decimal.Parse(f.Finance.Amount(1, 1000).ToString("0.00")))
+                .RuleFor(p => p.Quantity, f => f.Random.Number(1, 100));
+
+            const int batchSize = 5000;
+
+            for(int i = 0; i < count; i += batchSize)
+            {
+                var batch = faker.Generate(Math.Min(batchSize, count - i));
+                await CreateRangeAsync(batch, ct);
+
+                _dbContext.ChangeTracker.Clear();
+            }
         }
     }
 }

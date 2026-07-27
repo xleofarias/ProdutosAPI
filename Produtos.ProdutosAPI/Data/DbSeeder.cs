@@ -13,12 +13,8 @@ namespace ProdutosAPI.Data
                 return;
             }
 
-            var adminPassword = configuration["AdminPassword"];
+            var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? configuration["AdminPassword"] ?? "admin123";
             var passwordHash = PasswordHelper.Hash(adminPassword);
-            // 👇 O X-9 (DEBUG): O que estamos tentando salvar?
-            Console.WriteLine($"[DEBUG SEEDER] Senha usada: {adminPassword}");
-            Console.WriteLine($"[DEBUG SEEDER] Hash gerado: {passwordHash}");
-            Console.WriteLine($"[DEBUG SEEDER] Tamanho do Hash gerado: {passwordHash.Length}");
             var adminUser = new User
             {
                 Name = "Admin",

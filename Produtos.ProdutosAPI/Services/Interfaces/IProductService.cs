@@ -12,5 +12,6 @@ namespace ProdutosAPI.Services.Interfaces
        public  Task<Product> CreateAsync(ProductDTO product, CancellationToken cancellation = default);
        public  Task<bool> UpdateAsync(int id, ProductDTO produto, CancellationToken cancellation = default);
        public  Task<bool> DeleteAsync(int id, CancellationToken cancellation = default);
+       public  Task InvalidateProductCacheAsync(CancellationToken ct = default);
     }
 }

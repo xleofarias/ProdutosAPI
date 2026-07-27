@@ -11,8 +11,8 @@ using ProdutosAPI.Data;
 namespace ProdutosAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260623003513_ProductFix")]
-    partial class ProductFix
+    [Migration("20260724013049_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

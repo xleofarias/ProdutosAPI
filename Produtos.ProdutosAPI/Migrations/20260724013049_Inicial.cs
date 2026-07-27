@@ -7,7 +7,7 @@
 namespace ProdutosAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class AzureInitial : Migration
+    public partial class Inicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -72,12 +72,6 @@ namespace ProdutosAPI.Migrations
                     { 1, "Admin" },
                     { 2, "User" }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_Name",
-                table: "Products",
-                column: "Name",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_Slug",

@@ -72,6 +72,10 @@ StyleCopReport.xml
 # Env
 .env
 
+#AI
+.claude
+.codex
+
 # Files built by Visual Studio
 *_i.c
 *_p.c

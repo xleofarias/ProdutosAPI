@@ -11,8 +11,8 @@ using ProdutosAPI.Data;
 namespace ProdutosAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260619220929_AzureInitial")]
-    partial class AzureInitial
+    [Migration("20260724170555_CriarAdmin")]
+    partial class CriarAdmin
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,9 +45,6 @@ namespace ProdutosAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Products", (string)null);
                 });

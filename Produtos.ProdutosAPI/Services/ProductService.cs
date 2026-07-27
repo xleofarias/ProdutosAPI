@@ -18,7 +18,7 @@ namespace ProdutosAPI.Services
         private readonly ILogger<ProductService> _logger = logger;
         private readonly ISendEndpointProvider _publishEndpoint = publishEndpoint;
 
-        private const string CacheKey = "List_Products";
+        private const string CacheKey = "List:Products";
 
         // Busca um produto por um critério específico
         public async Task<Product> GetByFindAsync(Expression<Func<Product, bool>> predicate, CancellationToken ct = default)
@@ -39,7 +39,6 @@ namespace ProdutosAPI.Services
                 string? productsJson = await _cache.GetStringAsync(CacheKey, ct);
                 
 
-                // Entender isso aqui depois
                 if (!string.IsNullOrEmpty(productsJson))
                 {
                     var productCache = JsonSerializer.Deserialize<IEnumerable<Product>>(productsJson);
@@ -76,7 +75,41 @@ namespace ProdutosAPI.Services
 
         public async Task<PagedResult<Product>> ProductPaginationDtoAsync(int pageNumber, int pageSize, CancellationToken ct = default)
         {
-            return await _productRepository.ProductPaginationDtoAsync(pageNumber, pageSize, ct);
+            var version = await _cache.GetStringAsync("products:version", ct) ?? "0";
+            string cacheKey = $"v{version}:Page:{pageNumber}:Size:{pageSize}";
+
+            try
+            {
+                var productsJson = await _cache.GetStringAsync(cacheKey, ct);
+                if (!string.IsNullOrEmpty(productsJson))
+                {
+                    var productCache = JsonSerializer.Deserialize<PagedResult<Product>>(productsJson);
+                    return productCache;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Redis fora do ar!");
+            }
+
+            var pagedResult = await _productRepository.ProductPaginationDtoAsync(pageNumber, pageSize, ct);
+
+            try
+            {
+                var options = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                };
+
+                string jsonForSave = JsonSerializer.Serialize(pagedResult);
+                await _cache.SetStringAsync(cacheKey, jsonForSave, options);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Não foi possível realizar o cache dos produtos");
+            }
+
+            return pagedResult;
         }
 
         // Adiciona um novo produto
@@ -98,8 +131,8 @@ namespace ProdutosAPI.Services
             if (product.Price <= 0) throw new ArgumentException("O preço precisa ser maior que zero");
 
             await _productRepository.CreateAsync(newProduct, ct);
-            // Para limpa a lista assim no próximo get irá preencher com o nome produto
-            await _cache.RemoveAsync(CacheKey);
+
+            await InvalidateProductCacheAsync(ct);
 
             var evento = new ProductCreatedEvent(newProduct.Id, newProduct.Name, newProduct.Price, DateTime.UtcNow);
 
@@ -130,7 +163,8 @@ namespace ProdutosAPI.Services
             produtoAtualizar.Quantity = produto.Quantity;
             
             await _productRepository.UpdateAsync(id, produtoAtualizar, ct);
-            await _cache.RemoveAsync(CacheKey);
+
+            await InvalidateProductCacheAsync(ct);
 
             var evento = new ProductCreatedEvent(produtoAtualizar.Id, produtoAtualizar.Name, produtoAtualizar.Price, DateTime.UtcNow);
 
@@ -155,7 +189,8 @@ namespace ProdutosAPI.Services
             if (produtoDeletar is null) throw new KeyNotFoundException("Produto não encontrado");
 
             await _productRepository.DeleteAsync(id, ct);
-            await _cache.RemoveAsync(CacheKey);
+
+            await InvalidateProductCacheAsync(ct);
 
             var evento = new ProductCreatedEvent(produtoDeletar.Id, produtoDeletar.Name, produtoDeletar.Price, DateTime.UtcNow);
 
@@ -173,17 +208,13 @@ namespace ProdutosAPI.Services
 
         public async Task SeedAsync(int count = 50, CancellationToken ct = default)
         {
-            var faker = new Faker<Product>()
-                .RuleFor(p => p.Name, f => f.Commerce.ProductName())
-                .RuleFor(p => p.Price, f => decimal.Parse(f.Finance.Amount(1, 1000).ToString("0.00")))
-                .RuleFor(p => p.Quantity, f => f.Random.Number(1, 100));
-
-            var products = faker.Generate(count);
-
-            foreach (var product in products)
-            {
-                await _productRepository.CreateAsync(product, ct);
-            }
+            await _productRepository.SeedAsync(count, ct);
         } 
+
+        private async Task InvalidateProductCacheAsync(CancellationToken ct = default)
+        {
+            await _cache.RemoveAsync(CacheKey, ct);
+            await _cache.SetStringAsync("products:version", DateTime.UtcNow.Ticks.ToString(), ct);
+        }
     }
 }

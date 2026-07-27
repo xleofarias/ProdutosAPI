@@ -27,7 +27,7 @@ namespace ProdutosAPI.Extensions
             //Criação dos claims
             var claims = RoleClaimExtension.GetClaims(usuario);
 
-            var TokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            var TokenDescriptor = new SecurityTokenDescriptor
             {
                 //Claims que irão compor o token
                 Subject = new System.Security.Claims.ClaimsIdentity(claims),

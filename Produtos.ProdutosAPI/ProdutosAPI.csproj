@@ -4,8 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);1591</NoWarn>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UserSecretsId>4f9a1017-6ae5-4852-b1d0-22c3419574ee</UserSecretsId>
+    
   </PropertyGroup>
 
   <ItemGroup>

@@ -52,7 +52,7 @@ namespace ProdutosAPI.Controllers
         /// <summary>
         /// Alterar função do usuário
         /// </summary>
-        /// <param name="id">Código do Usuário</param>
+        /// <param name="userId">Código do Usuário</param>
         /// <response code="200">Função alterada com sucesso</response>
         /// <response code="401">Não Autorizado</response>
         /// <response code="500">Erro interno na aplicação</response>

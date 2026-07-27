@@ -141,7 +141,7 @@ internal class Program
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
-                        errorNumbersToAdd: null
+                        errorNumbersToAdd: null                
                     )
                 )
             );
@@ -172,9 +172,9 @@ internal class Program
             // Add RabbitMQ 
             builder.Services.AddMassTransit(x =>
             {
-                x.UsingAzureServiceBus((context, cfg) =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(Environment.GetEnvironmentVariable("AZURE_BUS_URL"));
+                    cfg.Host(Environment.GetEnvironmentVariable("RABBITMQ_URL"));
                 });
             });
 
@@ -202,14 +202,14 @@ internal class Program
                 var services = scope.ServiceProvider;
                 try
                 {
-                    //var context = services.GetRequiredService<AppDbContext>();
-                   // var configuartion = services.GetRequiredService<IConfiguration>();
+                    var context = services.GetRequiredService<AppDbContext>();
+                    var configuartion = services.GetRequiredService<IConfiguration>();
 
                     // 1. Aplica as tabelas (Migrations)
                     //context.Database.Migrate();
 
                     // 2. Criação do admin
-                    //await DbSeeder.SeedAdminUser(context, configuartion);
+                    await DbSeeder.SeedAdminUser(context, configuartion);
 
                 }
                 catch (Exception ex)
