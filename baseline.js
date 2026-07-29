@@ -5,9 +5,15 @@ import { Trend } from 'k6/metrics';
 // Dois baldes separados: cada tipo de página tem sua própria medição.
 const pageShallow = new Trend('dur_pagina_1', true);      // caso fácil
 const pageDeep    = new Trend('dur_pagina_profunda', true); // caso que dói (OFFSET grande)
+const email = __ENV.API_EMAIL;
+const senha = __ENV.API_SENHA;
 
 export function setup() {
-  
+  const res = http.post('http://localhost:8080/api/auth', JSON.stringify({ email: email, senha: senha }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  check(res, { 'login -> 200': (r) => r.status === 200 });
+  return res.json().token;
 }
 
 export const options = {
@@ -28,15 +34,16 @@ export const options = {
 const BASE = 'http://localhost:8080';
 const SIZE = 20;
 
-export default function () {
+export default function (data) {
+  const params = { headers: { 'Authorization': `Bearer ${data.token}` } };
   // Página 1 — o SQL entrega as 20 primeiras linhas, sem descartar nada.
-  const r1 = http.get(`${BASE}/api/produtos/pagination?pageNumber=1&pageSize=${SIZE}`);
+  const r1 = http.get(`${BASE}/api/products/pagination?pageNumber=1&pageSize=${SIZE}`, params);
   check(r1, { 'pagina 1 -> 200': (r) => r.status === 200 });
   pageShallow.add(r1.timings.duration);
 
   // Página 4000 — vira OFFSET 79980: o SQL lê e joga fora ~80k linhas
   // antes de entregar as 20. É o custo que o keyset vai eliminar depois.
-  const r2 = http.get(`${BASE}/api/produtos/pagination?pageNumber=4000&pageSize=${SIZE}`);
+  const r2 = http.get(`${BASE}/api/products/pagination?pageNumber=4000&pageSize=${SIZE}`, params );
   check(r2, { 'pagina profunda -> 200': (r) => r.status === 200 });
   pageDeep.add(r2.timings.duration);
 }
