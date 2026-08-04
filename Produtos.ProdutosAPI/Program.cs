@@ -162,6 +162,7 @@ internal class Program
             // Add Redis for IDistributedCache
             //builder.Services.AddDistributedMemoryCache();
             var redisConnection = Environment.GetEnvironmentVariable("REDIS_URL");
+
             builder.Services.AddStackExchangeRedisCache(o =>
             {
                 o.Configuration = redisConnection;

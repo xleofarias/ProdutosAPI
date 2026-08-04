@@ -6,18 +6,25 @@ using MassTransit;
 using Contracts.Events;
 using System.Linq.Expressions;
 using ProdutosAPI.Repositories.Interfaces;
+using ProdutosAPI.Services.Interfaces;
 using Bogus;
 
 namespace ProdutosAPI.Services
 {
     // Implementação do serviço de produtos
-    public class ProductService(IProductRepository productRepository, IDistributedCache cache, ILogger<ProductService> logger, ISendEndpointProvider publishEndpoint)
+    public class ProductService(IProductRepository productRepository
+                              , IDistributedCache cache
+                              , ILogger<ProductService> logger
+                              , ISendEndpointProvider publishEndpoint
+                              , IConfiguration configuration) : IProductService
     {
         private readonly IProductRepository _productRepository = productRepository;
         private readonly IDistributedCache _cache = cache;
         private readonly ILogger<ProductService> _logger = logger;
         private readonly ISendEndpointProvider _publishEndpoint = publishEndpoint;
+        private readonly IConfiguration _configuration = configuration;
 
+        private bool CacheEnabled => _configuration.GetValue<bool>("Cache:Enabled");
         private const string CacheKey = "List:Products";
 
         // Busca um produto por um critério específico
@@ -33,6 +40,11 @@ namespace ProdutosAPI.Services
         // Busca todos os produtos
         public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken ct = default)
         {
+            if(!CacheEnabled)
+            {
+                return await _productRepository.GetAllAsync(ct);
+            }
+
             try
             {
                 //Tenta buscar o json do produtos
@@ -75,16 +87,25 @@ namespace ProdutosAPI.Services
 
         public async Task<PagedResult<Product>> ProductPaginationDtoAsync(int pageNumber, int pageSize, CancellationToken ct = default)
         {
-            var version = await _cache.GetStringAsync("products:version", ct) ?? "0";
-            string cacheKey = $"v{version}:Page:{pageNumber}:Size:{pageSize}";
+            if(!CacheEnabled)
+            {
+                return await _productRepository.ProductPaginationDtoAsync(pageNumber, pageSize, ct);
+            }
+
+            string? cacheKey = null;
 
             try
             {
+                var version = await _cache.GetStringAsync("products:version", ct) ?? "0";
+                cacheKey = $"v{version}:Page:{pageNumber}:Size:{pageSize}";
+
                 var productsJson = await _cache.GetStringAsync(cacheKey, ct);
                 if (!string.IsNullOrEmpty(productsJson))
                 {
                     var productCache = JsonSerializer.Deserialize<PagedResult<Product>>(productsJson);
-                    return productCache;
+
+                    if(productCache is not null)
+                        return productCache;
                 }
             }
             catch (Exception ex)
@@ -94,21 +115,24 @@ namespace ProdutosAPI.Services
 
             var pagedResult = await _productRepository.ProductPaginationDtoAsync(pageNumber, pageSize, ct);
 
-            try
-            {
-                var options = new DistributedCacheEntryOptions
+
+            if(cacheKey is not null) {
+                try
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
-                };
+                    var options = new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                    };
 
-                string jsonForSave = JsonSerializer.Serialize(pagedResult);
-                await _cache.SetStringAsync(cacheKey, jsonForSave, options);
+                    string jsonForSave = JsonSerializer.Serialize(pagedResult);
+                    await _cache.SetStringAsync(cacheKey, jsonForSave, options);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Não foi possível realizar o cache dos produtos");
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Não foi possível realizar o cache dos produtos");
-            }
-
+            
             return pagedResult;
         }
 
@@ -211,7 +235,7 @@ namespace ProdutosAPI.Services
             await _productRepository.SeedAsync(count, ct);
         } 
 
-        private async Task InvalidateProductCacheAsync(CancellationToken ct = default)
+        public async Task InvalidateProductCacheAsync(CancellationToken ct = default)
         {
             await _cache.RemoveAsync(CacheKey, ct);
             await _cache.SetStringAsync("products:version", DateTime.UtcNow.Ticks.ToString(), ct);

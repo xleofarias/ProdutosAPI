@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check } from 'k6';
+import { check, fail } from 'k6';
 import { Trend } from 'k6/metrics';
 
 // Dois baldes separados: cada tipo de página tem sua própria medição.
@@ -9,12 +9,24 @@ const email = __ENV.API_EMAIL;
 const senha = __ENV.API_SENHA;
 
 export function setup() {
-  const res = http.post('http://localhost:8080/api/auth', JSON.stringify({ email: email, senha: senha }), {
+  const res = http.post('http://localhost:8080/api/Auth', JSON.stringify({ email: email, senha: senha }), {
     headers: { 'Content-Type': 'application/json' },
   });
   check(res, { 'login -> 200': (r) => r.status === 200 });
-  return res.json().token;
+
+  if(res.status !== 200) {
+    fail(`Falha no login: ${res.status} ${res.body}`);
+  }
+
+  const token = res.json().token;
+
+  if(!token) {
+    fail(`Falha no login: token não retornado. ${res.status} ${res.body}`);
+  }
+
+  return  {token: token};
 }
+
 
 export const options = {
   // Rampa: sobe devagar (warmup), segura, desce. O warmup evita medir
@@ -36,14 +48,29 @@ const SIZE = 20;
 
 export default function (data) {
   const params = { headers: { 'Authorization': `Bearer ${data.token}` } };
+
+  if (!params.headers.Authorization) {
+    fail('Token de autorização não encontrado. Verifique se o setup() retornou corretamente o token.');
+  }
+
+  check(params, { 'token presente': (p) => p.headers.Authorization !== undefined });
+
   // Página 1 — o SQL entrega as 20 primeiras linhas, sem descartar nada.
   const r1 = http.get(`${BASE}/api/products/pagination?pageNumber=1&pageSize=${SIZE}`, params);
+
+  if(!r1) {
+    fail('Falha na requisição da página 1: resposta nula ou indefinida. ${r1.status} ${r1.body}');
+  }
+
   check(r1, { 'pagina 1 -> 200': (r) => r.status === 200 });
   pageShallow.add(r1.timings.duration);
 
   // Página 4000 — vira OFFSET 79980: o SQL lê e joga fora ~80k linhas
   // antes de entregar as 20. É o custo que o keyset vai eliminar depois.
   const r2 = http.get(`${BASE}/api/products/pagination?pageNumber=4000&pageSize=${SIZE}`, params );
+  if(!r2) {
+    fail('Falha na requisição da página profunda: resposta nula ou indefinida. ${r2.status} ${r2.body}');
+  }
   check(r2, { 'pagina profunda -> 200': (r) => r.status === 200 });
   pageDeep.add(r2.timings.duration);
 }
