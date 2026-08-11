@@ -52,6 +52,36 @@ namespace ProdutosAPI.Repositories
 
             return new PagedResult<Product>(products, pageNumber, pageSize, totalItems, totalPages);
         }
+        
+        public async Task<PagedResultKey<Product>> ProductPaginationKeyAsync(int? cursor, int pageSize, CancellationToken ct = default)
+        {
+            var query = _dbContext.Products
+                .AsNoTracking();
+
+            if(cursor.HasValue)
+            {
+                query = query.Where(p => p.Id > cursor.Value);
+            }
+
+            var products = await query
+                .OrderBy(p => p.Id)
+                .Take(pageSize + 1)
+                .ToListAsync(ct);
+
+            var hasNextPage = products.Count > pageSize;
+
+            // Remove o último item se houver uma próxima página, para que possamos retornar apenas os itens da página atual.
+            if(hasNextPage)
+            {
+                products.RemoveAt(products.Count - 1);
+            }
+
+            // O operador ^ é usado para acessar elementos a partir do final da lista. products[^1] retorna o último elemento da lista.
+            int? nextCursor = hasNextPage && products.Count > 0 ? products[^1].Id : null;
+
+            return new PagedResultKey<Product>(products, nextCursor, hasNextPage);
+        }
+
         public async Task<bool> UpdateAsync(int id, Product product, CancellationToken ct = default)
         {
             var productToUpdate = await _dbContext.Products.FindAsync(new object[] { id }, ct);

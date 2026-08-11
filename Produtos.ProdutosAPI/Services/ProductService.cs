@@ -55,7 +55,8 @@ namespace ProdutosAPI.Services
                 {
                     var productCache = JsonSerializer.Deserialize<IEnumerable<Product>>(productsJson);
 
-                    return productCache;
+                    if(productCache is not null)
+                        return productCache;
                 }
             }catch(Exception ex)
             {
@@ -75,7 +76,7 @@ namespace ProdutosAPI.Services
                 };
 
                 string jsonForSave = JsonSerializer.Serialize<IEnumerable<Product>>(produtos);
-                await _cache.SetStringAsync(CacheKey, jsonForSave, options);
+                await _cache.SetStringAsync(CacheKey, jsonForSave, options, ct);
             }
             catch (Exception ex)
             {
@@ -125,7 +126,7 @@ namespace ProdutosAPI.Services
                     };
 
                     string jsonForSave = JsonSerializer.Serialize(pagedResult);
-                    await _cache.SetStringAsync(cacheKey, jsonForSave, options);
+                    await _cache.SetStringAsync(cacheKey, jsonForSave, options, ct);
                 }
                 catch (Exception ex)
                 {
@@ -133,6 +134,57 @@ namespace ProdutosAPI.Services
                 }
             }
             
+            return pagedResult;
+        }
+        public async Task<PagedResultKey<Product>> ProductPaginationKeyAsync(int? cursor, int pageSize, CancellationToken ct = default)
+        {
+
+            // Se o cache estiver desabilitado, busca diretamente do repositório
+            if(!CacheEnabled)
+            {
+                return await _productRepository.ProductPaginationKeyAsync(cursor, pageSize, ct);
+            }
+
+            string? cacheKey = null;
+
+            try
+            {
+                var version = await _cache.GetStringAsync("products:version", ct) ?? "0";
+                cacheKey = $"v{version}:Cursor:{cursor}:Size:{pageSize}";
+
+                var productsJson = await _cache.GetStringAsync(cacheKey, ct);
+                if (!string.IsNullOrEmpty(productsJson))
+                {
+                    var productCache = JsonSerializer.Deserialize<PagedResultKey<Product>>(productsJson);
+
+                    if(productCache is not null)
+                        return productCache;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Redis fora do ar!");
+            }
+
+            var pagedResult = await _productRepository.ProductPaginationKeyAsync(cursor, pageSize, ct);
+
+            if(cacheKey is not null) {
+                try
+                {
+                    var options = new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                    };
+
+                    string jsonForSave = JsonSerializer.Serialize(pagedResult);
+                    await _cache.SetStringAsync(cacheKey, jsonForSave, options, ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Não foi possível realizar o cache dos produtos");
+                }
+            }
+
             return pagedResult;
         }
 

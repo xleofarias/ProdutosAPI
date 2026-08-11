@@ -5,6 +5,7 @@ import { Trend } from 'k6/metrics';
 // Dois baldes separados: cada tipo de página tem sua própria medição.
 const pageShallow = new Trend('dur_pagina_1', true);      // caso fácil
 const pageDeep    = new Trend('dur_pagina_profunda', true); // caso que dói (OFFSET grande)
+const pageKeyset  = new Trend('dur_pagina_keyset', true);   // caso com keyset
 const email = __ENV.API_EMAIL;
 const senha = __ENV.API_SENHA;
 
@@ -59,7 +60,7 @@ export default function (data) {
   const r1 = http.get(`${BASE}/api/products/pagination?pageNumber=1&pageSize=${SIZE}`, params);
 
   if(!r1) {
-    fail('Falha na requisição da página 1: resposta nula ou indefinida. ${r1.status} ${r1.body}');
+    fail(`Falha na requisição da página 1: resposta nula ou indefinida. ${r1.status} ${r1.body}`);
   }
 
   check(r1, { 'pagina 1 -> 200': (r) => r.status === 200 });
@@ -69,8 +70,18 @@ export default function (data) {
   // antes de entregar as 20. É o custo que o keyset vai eliminar depois.
   const r2 = http.get(`${BASE}/api/products/pagination?pageNumber=4000&pageSize=${SIZE}`, params );
   if(!r2) {
-    fail('Falha na requisição da página profunda: resposta nula ou indefinida. ${r2.status} ${r2.body}');
+    fail(`Falha na requisição da página profunda: resposta nula ou indefinida. ${r2.status} ${r2.body}`);
   }
+
   check(r2, { 'pagina profunda -> 200': (r) => r.status === 200 });
   pageDeep.add(r2.timings.duration);
+
+  const r3 = http.get(`${BASE}/api/products/paginationKeyset?cursor=79980&pageSize=${SIZE}`, params );
+  
+  if(!r3) {
+    fail(`Falha na requisição da página keyset: resposta nula ou indefinida. ${r3.status} ${r3.body}`);
+  }
+
+  check(r3, { 'pagina keyset -> 200': (r) => r.status === 200 });
+  pageKeyset.add(r3.timings.duration);
 }

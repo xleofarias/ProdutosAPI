@@ -11,6 +11,7 @@ namespace ProdutosAPI.Repositories.Interfaces
         Task<Product> CreateAsync(Product product, CancellationToken ct = default);
         Task CreateRangeAsync(IEnumerable<Product> products, CancellationToken ct = default);
         Task<PagedResult<Product>> ProductPaginationDtoAsync(int pageNumber, int pageSize, CancellationToken ct = default);
+        Task<PagedResultKey<Product>> ProductPaginationKeyAsync(int? cursor, int pageSize, CancellationToken ct = default);
         Task<bool> UpdateAsync(int id, Product product, CancellationToken ct = default);
         Task<bool> DeleteAsync(int id, CancellationToken ct = default);
         Task SeedAsync(int count = 50, CancellationToken ct = default);

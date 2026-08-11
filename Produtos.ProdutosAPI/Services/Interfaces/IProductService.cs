@@ -9,7 +9,8 @@ namespace ProdutosAPI.Services.Interfaces
     {
        public  Task<Product> GetByFindAsync(Expression<Func<Product, bool>> predicate, CancellationToken cancellation = default);
        public  Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellation = default);
-       public  Task<PagedResult<Product>> ProductPaginationDtoAsync(int pageNumber, int pageSize, CancellationToken ct = default)
+       public  Task<PagedResult<Product>> ProductPaginationDtoAsync(int pageNumber, int pageSize, CancellationToken ct = default);
+       public  Task<PagedResultKey<Product>> ProductPaginationKeyAsync(int? cursor, int pageSize, CancellationToken ct = default);
        public  Task<Product> CreateAsync(ProductDTO product, CancellationToken cancellation = default);
        public  Task<bool> UpdateAsync(int id, ProductDTO produto, CancellationToken cancellation = default);
        public  Task<bool> DeleteAsync(int id, CancellationToken cancellation = default);

@@ -52,6 +52,14 @@ namespace ProdutosAPI.Controllers
             return Ok(pagedProducts);
         }
 
+        [HttpGet("paginationKeyset")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<PagedResultKey<Product>>> GetPaginationKeysetAsync([FromQuery] int cursor, [FromQuery] int pageSize = 10)
+        {
+            var pagedProducts = await _productsService.ProductPaginationKeyAsync(cursor, pageSize);
+            return Ok(pagedProducts);
+        }
+
         ///<summary>Cadastrar um novo produto</summary>
         ///<remarks>POST api/produtos</remarks>
         /// <response code="201">Produto cadastrado</response>

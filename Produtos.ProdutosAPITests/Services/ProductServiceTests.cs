@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using MassTransit;
 using Contracts.Events;
 using ProdutosAPI.Repositories.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace ProdutosAPITests.Services
 {
@@ -20,6 +21,7 @@ namespace ProdutosAPITests.Services
         private readonly Mock<ISendEndpoint> _mockSendEndpoint;
         private readonly Mock<ISendEndpointProvider> _mockSendEndpointProvider;
         private readonly Mock<ILogger<ProductService>>_logger;
+        private readonly Mock<IConfiguration> _mockConfiguration;
         private readonly ProductService _service;
 
         public ProductServiceTests()
@@ -31,7 +33,8 @@ namespace ProdutosAPITests.Services
             _logger = new Mock<ILogger<ProductService>>();
             _mockSendEndpointProvider.Setup(x => x.GetSendEndpoint(It.IsAny<Uri>()))
                 .ReturnsAsync(_mockSendEndpoint.Object);
-            _service = new ProductService(_mockRepo.Object, _mockCache.Object, _logger.Object, _mockSendEndpointProvider.Object);
+            _mockConfiguration = new Mock<IConfiguration>();
+            _service = new ProductService(_mockRepo.Object, _mockCache.Object, _logger.Object, _mockSendEndpointProvider.Object, _mockConfiguration.Object);
         }
         
         [Fact]
