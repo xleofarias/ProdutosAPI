@@ -21,7 +21,7 @@ API REST de catálogo com CRUD, autenticação JWT, cache distribuído e process
 | `Produtos.ProdutosAPI` | Web API REST síncrona |
 | `Produtos.WorkerService` | Background service que consome a fila |
 | `Produtos.Contracts` | Contratos compartilhados entre API e Worker |
-| `Produtos.ProdutosAPITests` | Testes unitários (xUnit + Moq) |
+| `Produtos.ProdutosAPITests` | Testes unitários (xUnit + Moq) e testes de integração de Repository com SQLite in-memory |
 
 O `Contracts` existe para que API e Worker compartilhem a definição das mensagens sem uma depender da outra. Publisher e consumer evoluem separados.
 
@@ -40,9 +40,10 @@ O `Contracts` existe para que API e Worker compartilhem a definição das mensag
   │ Service Bus  │ ────────► │   Worker   │
   └──────────────┘           └────────────┘
 
-   GET /api/produtos          ──► Redis Cloud (São Paulo) ──► Azure SQL no miss
-   GET /api/produtos/paginado ──► Redis Cloud (São Paulo) ──► Azure SQL no miss
-                                  cache-aside, TTL 2 min
+   GET /api/produtos                    ──► Redis Cloud (São Paulo) ──► Azure SQL no miss
+   GET /api/produtos/pagination         ──► Redis Cloud (São Paulo) ──► Azure SQL no miss
+   GET /api/produtos/paginationKeyset   ──► Redis Cloud (São Paulo) ──► Azure SQL no miss
+                                            cache-aside, TTL 2 min
 ```
 
 Logging estruturado com Serilog. Autenticação JWT com hashing PBKDF2 (HMAC-SHA256) nativo do .NET.
@@ -53,7 +54,7 @@ O projeto rodava fora do Azure. Cada peça foi mapeada para o serviço gerenciad
 
 | Componente | Antes | Depois | Por quê |
 | --- | --- | --- | --- |
-| Banco relacional | PostgreSQL (Render) | **Azure SQL Database** (free offer, serverless) | O Postgres gratuito do Render expira em 30 dias. Consolidei o banco na mesma nuvem da aplicação e aproveitei para alinhar o projeto com T-SQL |
+| Banco relacional | PostgreSQL (Render) | **Azure SQL Database** (free offer, serverless) | A migração para Azure SQL Database foi feita como parte da trilha prática de Azure e para exercitar uma migração real de infraestrutura para a nuvem. Após o período gratuito utilizado no Azure, o banco voltou a rodar localmente por enquanto, mantendo no projeto as decisões, aprendizados e documentação da migração |
 | Hospedagem | Render | **Azure Container Apps** | Já estava dockerizado; escala a zero |
 | Mensageria | RabbitMQ (CloudAMQP) | **Azure Service Bus** | MassTransit suporta como *transport*: a troca é de configuração, o código de publisher/consumer não muda |
 | Cache | Redis (desativado durante a transição) | **Redis Cloud** (AWS `sa-east-1`, São Paulo) | Colocalizado com a aplicação. Ver decisões abaixo |
@@ -74,6 +75,10 @@ O projeto rodava fora do Azure. Cada peça foi mapeada para o serviço gerenciad
 **Governança de custo antes de escalar.** O free offer do Azure SQL dá 100.000 vCore-segundos e 32 GB por mês. Três camadas: o *behavior* do free limit em auto-pause (o freio real, porque budget **alerta**, não bloqueia), um budget na assinatura com alertas *forecasted* e *actual*, e um alerta de métrica em `Free amount remaining` abaixo de 10% da cota.
 
 **Benchmark roda local, não na nuvem.** Medir p95 contra o Azure SQL serverless misturaria três variáveis: a query, o *resume* do auto-pause e a latência até a região. Os números de performance são colhidos contra SQL Server em container local. A nuvem prova que está no ar; o local prova o número.
+
+**Offset e keyset foram mantidos porque resolvem problemas diferentes.** A paginação por offset continua útil quando o cliente precisa navegar por páginas numeradas ou saltar diretamente para uma página específica. Para páginas profundas, foi adicionado um endpoint por keyset usando `Id` como cursor (`WHERE Id > cursor ORDER BY Id`). Em vez de descartar milhares de linhas anteriores, a consulta continua a partir de uma posição conhecida. O contrato também muda: offset retorna `PageNumber`, `TotalItems` e `TotalPages`; keyset retorna `NextCursor` e `HasNextPage`.
+
+**O benchmark confirmou a diferença em páginas profundas.** Com 100 mil produtos, cache desligado e k6 local, a mesma execução mediu p95 de **136,65 ms** no offset profundo e **12,12 ms** no keyset na mesma região da tabela — aproximadamente **11,3x menor** para o keyset, com **0% de erros**. O endpoint offset também executa `CountAsync` para calcular totais, enquanto o keyset não precisa desse custo; portanto, o teste compara os contratos reais dos endpoints, não um microbenchmark isolado de `OFFSET` versus `WHERE`. Metodologia e resultados completos estão em [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
 **Limite conhecido do cache do `GET /api/produtos`.** O endpoint que lista tudo serializa o catálogo inteiro sob uma única chave. Com 400 produtos, o Redis consome ~340 bytes por produto (descontado o overhead de ~2 MB da instância); contra o teto de 30 MB do tier gratuito, essa estratégia satura em torno de **85 mil produtos**. Por isso a leitura sob carga usa o endpoint paginado, que cacheia página a página. A rota que lista tudo permanece por conveniência, com o limite documentado.
 
@@ -121,7 +126,8 @@ Faça um `POST /api/produtos` e acompanhe o Worker consumindo o evento.
 | --- | --- | --- |
 | POST | `/v1/auth/login` | Autenticação e emissão de JWT |
 | GET | `/api/produtos` | Lista todos os produtos (cache-aside, TTL 2 min) |
-| GET | `/api/produtos/pagination` | Lista paginada (`pageNumber`, `pageSize`), cache versionado por página |
+| GET | `/api/produtos/pagination` | Paginação por offset (`pageNumber`, `pageSize`), cache versionado por página |
+| GET | `/api/produtos/paginationKeyset` | Paginação por keyset (`cursor`, `pageSize`), com `NextCursor` e `HasNextPage` |
 | GET | `/api/produtos/{id}` | Detalhe de um produto |
 | POST | `/api/produtos` | Cadastro (publica evento no Service Bus) |
 | PUT | `/api/produtos/{id}` | Atualização |
@@ -135,13 +141,14 @@ O cache degrada com elegância: falha de Redis é registrada como warning e a re
 - [x] Estrutura monorepo com contratos compartilhados
 - [x] Mensageria assíncrona (produtor/consumidor)
 - [x] Testes unitários (xUnit + Moq)
+- [x] Testes de integração do Repository com SQLite in-memory
 - [x] Migração para Azure (SQL Database, Container Apps, Service Bus)
 - [x] CI/CD com GitHub Actions e login OIDC (sem segredos de longa duração)
 - [x] Governança de custo (budget + alerta de cota + auto-pause)
 - [x] Cache distribuído real (Redis Cloud, colocalizado em São Paulo)
 - [x] Paginação com cache versionado e invalidação por versão
-- [ ] Paginação por keyset (substituir OFFSET em páginas profundas)
-- [ ] `PERFORMANCE.md` com baseline e medições sob carga (k6)
+- [x] Paginação por keyset com cursor por `Id`, mantendo offset para navegação numerada
+- [x] `PERFORMANCE.md` com baseline e comparação offset vs keyset (k6)
 - [ ] `docker-compose.yml` para dependências locais
 - [ ] Observabilidade com Application Insights
 
