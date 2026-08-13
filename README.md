@@ -125,13 +125,13 @@ Faça um `POST /api/produtos` e acompanhe o Worker consumindo o evento.
 | Método | Endpoint | Descrição |
 | --- | --- | --- |
 | POST | `/v1/auth/login` | Autenticação e emissão de JWT |
-| GET | `/api/produtos` | Lista todos os produtos (cache-aside, TTL 2 min) |
-| GET | `/api/produtos/pagination` | Paginação por offset (`pageNumber`, `pageSize`), cache versionado por página |
-| GET | `/api/produtos/paginationKeyset` | Paginação por keyset (`cursor`, `pageSize`), com `NextCursor` e `HasNextPage` |
-| GET | `/api/produtos/{id}` | Detalhe de um produto |
-| POST | `/api/produtos` | Cadastro (publica evento no Service Bus) |
-| PUT | `/api/produtos/{id}` | Atualização |
-| DELETE | `/api/produtos/{id}` | Remoção |
+| GET | `/api/products` | Lista todos os produtos (cache-aside, TTL 2 min) |
+| GET | `/api/products/pagination` | Paginação por offset (`pageNumber`, `pageSize`), cache versionado por página |
+| GET | `/api/products/paginationKeyset` | Paginação por keyset (`cursor`, `pageSize`), com `NextCursor` e `HasNextPage` |
+| GET | `/api/products/{id}` | Detalhe de um produto |
+| POST | `/api/products` | Cadastro (publica evento no Service Bus) |
+| PUT | `/api/products/{id}` | Atualização |
+| DELETE | `/api/products/{id}` | Remoção |
 
 O cache degrada com elegância: falha de Redis é registrada como warning e a requisição segue para o banco. Indisponibilidade de cache não derruba a API.
 

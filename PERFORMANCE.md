@@ -39,7 +39,7 @@ Os resultados brutos estão preservados em:
 Consulta a primeira página, sem descarte relevante de registros anteriores.
 
 ```http
-GET /api/produtos/pagination?pageNumber=1&pageSize=20
+GET /api/products/pagination?pageNumber=1&pageSize=20
 ```
 
 ### Offset — página profunda
@@ -53,7 +53,7 @@ A página 4000 com 20 registros por página representa um deslocamento de:
 Conceitualmente, a consulta precisa alcançar a posição depois de aproximadamente 79.980 registros antes de devolver os próximos 20.
 
 ```http
-GET /api/produtos/pagination?pageNumber=4000&pageSize=20
+GET /api/products/pagination?pageNumber=4000&pageSize=20
 ```
 
 ### Keyset — mesma região da tabela
@@ -61,7 +61,7 @@ GET /api/produtos/pagination?pageNumber=4000&pageSize=20
 Para comparar com a região profunda do offset, o cursor foi posicionado em torno do mesmo ponto:
 
 ```http
-GET /api/produtos/paginationKeyset?cursor=79980&pageSize=20
+GET /api/products/paginationKeyset?cursor=79980&pageSize=20
 ```
 
 A consulta no Repository segue a ideia:
